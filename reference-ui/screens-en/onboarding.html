@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onboarding — Threadline</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  .wrap { width: min(1040px, calc(100vw - 32px)); margin: 34px auto 72px; }
+  .layout { display: grid; grid-template-columns: 300px 1fr; gap: 22px; margin-top: 24px; }
+  .steps { padding: 18px; height: fit-content; }
+  .steps div { display: flex; gap: 10px; align-items: center; padding: 13px; border-radius: var(--radius); color: var(--muted); font-weight: 650; }
+  .steps div.active { color: var(--fg); background: var(--surface-2); }
+  .panel-form { padding: clamp(20px, 4vw, 34px); }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .choice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+  .choice { text-align: left; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; background: var(--surface); color: var(--fg); min-height: 110px; }
+  .choice.selected { border-color: var(--accent); box-shadow: 0 0 0 3px oklch(58% 0.18 255 / 0.1); }
+  .choice span { display: block; margin-top: 8px; color: var(--muted); font-weight: 400; }
+  .footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+  @media (max-width: 820px) { .layout, .choice-grid { grid-template-columns: 1fr; } .steps { display: none; } }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner"><a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a><span class="badge badge-accent">Setup</span></div></header>
+<main class="wrap">
+  <span class="eyebrow">Progressive profile</span>
+  <h1 style="font-size:clamp(2.4rem,6vw,5rem);max-width:760px">Give the AI just enough context to build your first week.</h1>
+  <div class="layout">
+    <aside class="card steps"><div class="active">1 · Goal type</div><div>2 · Current blocker</div><div>3 · Time budget</div><div>4 · First plan</div></aside>
+    <section class="panel panel-form" id="wizard"></section>
+  </div>
+</main>
+<script>
+const screens = [
+  { title: 'What kind of goal should Threadline coach first?', choices: [['Learning / exams','Study, coding, language, certification'],['SEO / growth','Keywords, content, backlinks, publishing'],['Writing / output','Blog, newsletter, scripts, long-form'],['Movement / health','Walking, running, strength, recovery']] },
+  { title: 'What most often breaks the line?', choices: [['I cannot start','The task feels too large'],['I get distracted','Feeds and short entertainment win'],['I miss once and quit','The plan collapses after interruption'],['I over-plan','Research replaces execution']] },
+  { title: 'Pick a realistic daily budget for week one.', choices: [['5 minutes','Only protect the line'],['15 minutes','Small but real progress'],['30 minutes','Standard training block'],['60 minutes','High-intent project mode']] },
+  { title: 'Your first-week protocol is ready.', choices: [['Main training','5-minute start + reading base'],['Goal task','One classified project action daily'],['Recovery rule','Minimum task counts as success'],['Review cadence','AI review after day 7']] }
+];
+let step = 0;
+const selected = {};
+function render() {
+  document.querySelectorAll('.steps div').forEach((el,i) => el.classList.toggle('active', i === step));
+  const data = screens[step];
+  document.getElementById('wizard').innerHTML = `<span class="badge">${step + 1} / ${screens.length}</span><h2 style="font-size:clamp(1.8rem,4vw,3.4rem);margin:14px 0">${data.title}</h2><div class="choice-grid">${data.choices.map((c,i) => `<button class="choice ${selected[step] === i ? 'selected' : ''}" data-choice="${i}"><strong>${c[0]}</strong><span>${c[1]}</span></button>`).join('')}</div><div class="footer"><button class="btn btn-secondary" id="back" ${step === 0 ? 'disabled' : ''}>Back</button><button class="btn btn-primary" id="next">${step === screens.length - 1 ? 'Open dashboard' : 'Next'}</button></div>`;
+  document.querySelectorAll('[data-choice]').forEach(btn => btn.addEventListener('click', () => { selected[step] = Number(btn.dataset.choice); render(); }));
+  document.getElementById('back').addEventListener('click', () => { if (step > 0) { step--; render(); } });
+  document.getElementById('next').addEventListener('click', () => { if (step < screens.length - 1) { step++; render(); } else location.href = 'dashboard.html'; });
+}
+render();
+</script>
+</body>
+</html>

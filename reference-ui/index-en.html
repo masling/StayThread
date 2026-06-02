@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Threadline is an AI goal training system that turns long-term ambition into daily adaptive practice, recovery tasks, and measurable progress.">
+<title>Threadline — English Product Prototype</title>
+<link rel="stylesheet" href="css/tokens-en.css">
+<style>
+  .hero { padding: clamp(56px, 10vw, 116px) 0 44px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.78fr); gap: clamp(28px, 5vw, 68px); align-items: center; }
+  h1 { font-size: clamp(3.15rem, 8vw, 6.8rem); max-width: 900px; }
+  .lead { margin-top: 22px; max-width: 660px; font-size: clamp(1.08rem, 2vw, 1.32rem); }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+  .system-card { padding: 18px; }
+  .system-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .mini-loop { display: grid; gap: 10px; }
+  .loop-row { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .loop-row b { font-size: 0.94rem; }
+  .loop-row span { font-size: 0.78rem; color: var(--muted); }
+  .screen-section { padding: 46px 0 78px; }
+  .screen-section h2 { font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: 12px; }
+  .screen-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 26px; }
+  .screen-card { padding: 20px; min-height: 188px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.15s ease, border-color 0.15s ease; }
+  .screen-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .screen-card h3 { font-size: 1.18rem; margin: 12px 0 8px; }
+  .screen-card p { font-size: 0.92rem; }
+  .screen-card footer { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; color: var(--muted); font-size: 0.8rem; }
+  .note { padding: 18px; display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-top: 24px; }
+  @media (max-width: 980px) {
+    .hero-grid, .screen-grid { grid-template-columns: 1fr; }
+    .system-card { max-width: 620px; }
+  }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="index-en.html"><span class="brand-mark"></span><span>Threadline</span></a>
+    <nav class="nav-links" aria-label="Prototype">
+      <a href="screens-en/landing.html">Landing</a>
+      <a href="screens-en/assessment.html">Assessment</a>
+      <a href="screens-en/dashboard.html">Dashboard</a>
+      <a href="screens-en/goals.html">Goals</a>
+      <a href="screens-en/settings.html">Settings</a>
+    </nav>
+    <div class="actions">
+      <a class="btn btn-ghost" href="index.html">Old Chinese version</a>
+      <a class="btn btn-primary" href="screens-en/landing.html">Open prototype</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="container hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">English v2 · AI goal training SaaS</div>
+        <h1>Train the ability to keep long goals alive.</h1>
+        <p class="lead">Threadline helps students, operators, and early freelancers diagnose why they drop long-term goals, then converts ambition into adaptive daily training, recovery tasks, and weekly AI review.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="screens-en/assessment.html">Start the assessment</a>
+          <a class="btn btn-secondary" href="screens-en/dashboard.html">View product dashboard</a>
+        </div>
+      </div>
+      <aside class="panel system-card" aria-label="Product loop preview">
+        <header>
+          <span class="eyebrow">Core loop</span>
+          <span class="badge badge-accent">MVP scope</span>
+        </header>
+        <div class="mini-loop">
+          <div class="loop-row"><i class="dot"></i><b>Assess</b><span>7 dimensions</span></div>
+          <div class="loop-row"><i class="dot" style="background:var(--accent-2)"></i><b>Prescribe</b><span>7-day plan</span></div>
+          <div class="loop-row"><i class="dot" style="background:var(--warn)"></i><b>Train</b><span>reading + movement</span></div>
+          <div class="loop-row"><i class="dot" style="background:var(--success)"></i><b>Coach goals</b><span>standard / easy / minimum</span></div>
+          <div class="loop-row"><i class="dot" style="background:var(--fg)"></i><b>Review</b><span>adaptive weekly reset</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="container screen-section">
+    <span class="eyebrow">Prototype map</span>
+    <h2>Separate product screens, not one long mockup.</h2>
+    <p class="lead">The old Chinese files are preserved. This version uses English as the primary product language and adds product-real interactions for assessment, auth, onboarding, dashboard tasks, goal review, pricing, and settings.</p>
+    <div class="screen-grid">
+      <a class="card screen-card" href="screens-en/landing.html"><div><span class="badge">01 SEO</span><h3>SEO landing</h3><p>Problem framing, product loop, audience segments, and assessment CTA.</p></div><footer><span>Public</span><span>Open →</span></footer></a>
+      <a class="card screen-card" href="screens-en/assessment.html"><div><span class="badge">02 Diagnostic</span><h3>Action assessment</h3><p>Interactive scoring across clarity, start, continuity, resistance, recovery, energy, and planning.</p></div><footer><span>Interactive</span><span>Open →</span></footer></a>
+      <a class="card screen-card" href="screens-en/auth.html"><div><span class="badge">03 OAuth</span><h3>Register / login</h3><p>Google, GitHub, Apple, WeChat QR, and email path in one auth surface.</p></div><footer><span>Auth</span><span>Open →</span></footer></a>
+      <a class="card screen-card" href="screens-en/onboarding.html"><div><span class="badge">04 Setup</span><h3>Onboarding</h3><p>Progressive profile capture: goal category, current blockers, time budget, and first plan.</p></div><footer><span>App</span><span>Open →</span></footer></a>
+      <a class="card screen-card" href="screens-en/dashboard.html"><div><span class="badge">05 Today</span><h3>Training dashboard</h3><p>Daily state, adaptive task tiers, streak recovery, and AI coaching panel.</p></div><footer><span>App</span><span>Open →</span></footer></a>
+      <a class="card screen-card" href="screens-en/goals.html"><div><span class="badge">06 Coach</span><h3>Goal tracking</h3><p>Classified goal templates for SEO, learning, writing, movement, and project work.</p></div><footer><span>App</span><span>Open →</span></footer></a>
+      <a class="card screen-card" href="screens-en/pricing.html"><div><span class="badge">07 Plans</span><h3>Pricing</h3><p>Free, Pro, and Team tiers with trial messaging and FAQ.</p></div><footer><span>Public</span><span>Open →</span></footer></a>
+      <a class="card screen-card" href="screens-en/settings.html"><div><span class="badge">08 Control</span><h3>Settings</h3><p>Profile, connected accounts, focus sources, reminder windows, and data export.</p></div><footer><span>App</span><span>Open →</span></footer></a>
+    </div>
+    <div class="card note">
+      <p><strong>Design system:</strong> precise neutral AI workspace, cobalt primary action, green continuity signals, dense product modules, no generated demo controls inside product screens.</p>
+      <a class="btn btn-secondary" href="buduanxian-prototype.html">Open previous artifact</a>
+    </div>
+  </section>
+</main>
+</body>
+</html>

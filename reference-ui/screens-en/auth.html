@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in — Threadline</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  .auth { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 520px); }
+  .story { padding: clamp(28px, 7vw, 86px); display: flex; flex-direction: column; justify-content: space-between; }
+  .story h1 { font-size: clamp(3rem, 7vw, 6.4rem); max-width: 760px; }
+  .story p { margin-top: 24px; max-width: 600px; font-size: 1.15rem; }
+  .auth-panel { padding: clamp(24px, 5vw, 46px); border-left: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; justify-content: center; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); margin: 22px 0; }
+  .tabs button { border: 0; border-radius: 9px; background: transparent; min-height: 38px; font-weight: 700; color: var(--muted); }
+  .tabs button.active { background: var(--surface); color: var(--fg); box-shadow: 0 1px 8px oklch(18% 0.012 250 / 0.08); }
+  .oauth { display: grid; gap: 10px; }
+  .oauth button { min-height: 44px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font-weight: 650; color: var(--fg); }
+  .form { display: grid; gap: 12px; margin-top: 18px; }
+  .qr { display: none; place-items: center; gap: 12px; padding: 24px; border: 1px dashed var(--border); border-radius: var(--radius-lg); margin-top: 14px; }
+  .qr.active { display: grid; }
+  .qr-box { width: 138px; height: 138px; background: conic-gradient(from 90deg, var(--fg) 0 25%, transparent 0 50%, var(--fg) 0 75%, transparent 0); background-size: 28px 28px; border: 14px solid white; box-shadow: inset 0 0 0 1px var(--border); }
+  @media (max-width: 880px) { .auth { grid-template-columns: 1fr; } .auth-panel { border-left: 0; border-top: 1px solid var(--border); } }
+</style>
+</head>
+<body>
+<main class="auth">
+  <section class="story">
+    <a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a>
+    <div>
+      <span class="eyebrow">Save your assessment</span>
+      <h1>Your plan starts after the diagnostic, not before it.</h1>
+      <p>Use OAuth for quick entry, then add only the profile details needed to tune your first training prescription.</p>
+    </div>
+    <div class="grid-3">
+      <div class="metric"><strong>7</strong><span>action dimensions</span></div>
+      <div class="metric"><strong>3</strong><span>task tiers every day</span></div>
+      <div class="metric"><strong>5m</strong><span>minimum restart rule</span></div>
+    </div>
+  </section>
+  <section class="auth-panel">
+    <span class="eyebrow">Account</span>
+    <h2 style="font-size:2rem;margin-top:10px" id="panelTitle">Create your Threadline account</h2>
+    <div class="tabs"><button class="active" data-tab="signup">Sign up</button><button data-tab="login">Log in</button></div>
+    <div class="oauth">
+      <button>Continue with Google</button>
+      <button>Continue with GitHub</button>
+      <button>Continue with Apple</button>
+      <button id="wechat">Continue with WeChat QR</button>
+    </div>
+    <div class="qr" id="qr"><div class="qr-box" aria-label="QR placeholder"></div><p>Scan with WeChat to continue.</p></div>
+    <form class="form" onsubmit="event.preventDefault(); location.href='onboarding.html'">
+      <input class="input" type="email" placeholder="Email address" required>
+      <input class="input" type="password" placeholder="Password" required>
+      <button class="btn btn-primary btn-wide" type="submit">Continue to onboarding</button>
+    </form>
+  </section>
+</main>
+<script>
+document.querySelectorAll('[data-tab]').forEach(tab => tab.addEventListener('click', () => {
+  document.querySelectorAll('[data-tab]').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  document.getElementById('panelTitle').textContent = tab.dataset.tab === 'signup' ? 'Create your Threadline account' : 'Welcome back to Threadline';
+}));
+document.getElementById('wechat').addEventListener('click', () => document.getElementById('qr').classList.toggle('active'));
+</script>
+</body>
+</html>

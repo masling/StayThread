@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Settings — Threadline</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  .header { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin-bottom: 24px; }
+  .header h1 { font-size: clamp(2.4rem, 5vw, 4.4rem); }
+  .settings { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+  .settings-nav { padding: 12px; height: fit-content; }
+  .settings-nav button { width: 100%; min-height: 42px; border: 0; border-radius: var(--radius); background: transparent; color: var(--muted); text-align: left; padding: 0 12px; font-weight: 700; }
+  .settings-nav button.active { background: var(--surface-2); color: var(--fg); }
+  .pane { padding: 24px; }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .switch { width: 48px; height: 28px; border: 0; border-radius: 999px; background: var(--border); padding: 3px; transition: background 0.15s ease; }
+  .switch::after { content: ""; display: block; width: 22px; height: 22px; border-radius: 50%; background: white; transition: transform 0.15s ease; box-shadow: 0 1px 5px oklch(18% 0.012 250 / 0.18); }
+  .switch.active { background: var(--accent); }
+  .switch.active::after { transform: translateX(20px); }
+  .account-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px; }
+  @media (max-width: 880px) { .header, .settings, .account-grid { grid-template-columns: 1fr; display: grid; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar"><a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a><nav class="side-nav"><a href="dashboard.html"><span class="dot"></span>Today</a><a href="goals.html"><span class="dot" style="background:var(--accent-2)"></span>Goals</a><a href="assessment.html"><span class="dot" style="background:var(--warn)"></span>Assessment</a><a class="active" href="settings.html"><span class="dot" style="background:var(--fg)"></span>Settings</a></nav></aside>
+  <main class="main">
+    <div class="header"><div><span class="eyebrow">Control surface</span><h1>Keep the system helpful, not noisy.</h1></div><button class="btn btn-primary" id="save">Save changes</button></div>
+    <section class="settings">
+      <nav class="card settings-nav" id="tabs"><button class="active" data-pane="profile">Profile</button><button data-pane="accounts">Connected accounts</button><button data-pane="focus">Focus sources</button><button data-pane="data">Data and export</button></nav>
+      <article class="panel pane" id="pane"></article>
+    </section>
+  </main>
+</div>
+<nav class="mobile-bar"><a href="dashboard.html">Today</a><a href="goals.html">Goals</a><a href="assessment.html">Assess</a><a class="active" href="settings.html">Settings</a></nav>
+<script>
+const panes = {
+  profile: `<span class="badge badge-accent">Profile</span><h2 style="margin:14px 0;font-size:2rem">Training profile</h2><div class="account-grid"><label>Display name<input class="input" value="Alex Chen"></label><label>Primary goal type<select class="input"><option>SEO / growth</option><option>Learning</option><option>Writing</option></select></label><label>Daily budget<select class="input"><option>15 minutes</option><option>30 minutes</option><option>60 minutes</option></select></label><label>Current stage<input class="input" value="L3 · Keep-going"></label></div>`,
+  accounts: `<span class="badge">OAuth</span><h2 style="margin:14px 0;font-size:2rem">Connected accounts</h2>${['Google connected','GitHub connected','Apple not connected','WeChat QR not connected'].map((x,i)=>`<div class="row"><div><strong>${x}</strong><p>${i<2?'Used for login and account recovery.':'Available as an alternate sign-in path.'}</p></div><button class="btn btn-secondary">${i<2?'Manage':'Connect'}</button></div>`).join('')}`,
+  focus: `<span class="badge badge-warn">Focus</span><h2 style="margin:14px 0;font-size:2rem">Distraction and reminder rules</h2>${['Track short-video temptation','Ask for energy before task tiering','Send evening recovery reminder','Lower difficulty after two missed days'].map((x,i)=>`<div class="row"><div><strong>${x}</strong><p>Used by the AI coach to decide when to protect continuity.</p></div><button class="switch ${i!==0?'active':''}" aria-label="${x}"></button></div>`).join('')}`,
+  data: `<span class="badge">Data</span><h2 style="margin:14px 0;font-size:2rem">Export and privacy</h2><div class="row"><div><strong>Export progress data</strong><p>Download tasks, states, process metrics, and weekly review notes.</p></div><button class="btn btn-secondary">Export CSV</button></div><div class="row"><div><strong>Delete account</strong><p>Prototype-only destructive action is disabled.</p></div><button class="btn btn-secondary" disabled>Disabled</button></div>`
+};
+function renderPane(id) {
+  document.getElementById('pane').innerHTML = panes[id];
+  document.querySelectorAll('.switch').forEach(sw => sw.addEventListener('click', () => sw.classList.toggle('active')));
+}
+document.querySelectorAll('[data-pane]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('[data-pane]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderPane(btn.dataset.pane); }));
+document.getElementById('save').addEventListener('click', () => alert('Prototype action: settings saved.'));
+renderPane('profile');
+</script>
+</body>
+</html>

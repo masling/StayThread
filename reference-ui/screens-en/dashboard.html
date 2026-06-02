@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Today — Threadline</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 24px; }
+  .top h1 { font-size: clamp(2.4rem, 5vw, 4.6rem); }
+  .workbench { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+  .state-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0 24px; }
+  .state { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); min-height: 76px; color: var(--fg); font-weight: 760; }
+  .state small { display: block; color: var(--muted); font-weight: 500; margin-top: 4px; }
+  .state.selected { border-color: var(--accent); background: oklch(58% 0.18 255 / 0.07); }
+  .task-stack { display: grid; gap: 14px; }
+  .task-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 14px; }
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .tier { text-align: left; min-height: 128px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); padding: 14px; color: var(--fg); }
+  .tier.selected { border-color: var(--accent); background: oklch(58% 0.18 255 / 0.07); }
+  .tier b { display: block; margin-bottom: 8px; }
+  .tier span { display: block; color: var(--muted); font-size: 0.84rem; }
+  .side-card { padding: 18px; margin-bottom: 14px; }
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 16px; }
+  .day { aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); font: 760 0.72rem/1 var(--font-mono); }
+  .day.done { background: var(--success); color: white; }
+  .day.low { background: var(--warn); color: white; }
+  .day.today { outline: 2px solid var(--accent); background: var(--surface); color: var(--fg); }
+  .toast { position: fixed; right: 20px; bottom: 20px; max-width: 340px; padding: 16px; display: none; }
+  .toast.active { display: block; }
+  @media (max-width: 1060px) { .workbench { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) { .top, .tiers, .state-grid { display: grid; grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a>
+    <nav class="side-nav"><a class="active" href="dashboard.html"><span class="dot"></span>Today</a><a href="goals.html"><span class="dot" style="background:var(--accent-2)"></span>Goals</a><a href="assessment.html"><span class="dot" style="background:var(--warn)"></span>Assessment</a><a href="settings.html"><span class="dot" style="background:var(--fg)"></span>Settings</a></nav>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <div><span class="eyebrow">Sunday · May 24</span><h1>Today only needs a clean line.</h1><p class="lead">The AI has lowered intensity because yesterday was completed late.</p></div>
+      <a class="btn btn-secondary" href="goals.html">Create goal</a>
+    </div>
+    <section class="workbench">
+      <div>
+        <section class="panel side-card">
+          <span class="eyebrow">Current state</span>
+          <div class="state-grid" id="states">
+            <button class="state selected">Ready<small>standard tasks</small></button>
+            <button class="state">Busy<small>easy tasks</small></button>
+            <button class="state">Tired<small>minimum line</small></button>
+            <button class="state">Recovering<small>restart only</small></button>
+          </div>
+        </section>
+        <section class="task-stack" id="tasks"></section>
+      </div>
+      <aside>
+        <section class="panel side-card"><span class="eyebrow">Line status</span><div class="metric" style="margin-top:14px"><strong>6</strong><span>days intact · one protected low-energy day</span></div><div class="week"><div class="day done">M</div><div class="day done">T</div><div class="day done">W</div><div class="day low">T</div><div class="day done">F</div><div class="day done">S</div><div class="day today">S</div></div></section>
+        <section class="panel side-card"><span class="eyebrow">AI coach</span><h3 style="margin:12px 0">Protect continuity before volume.</h3><p>Your weakest dimension is recovery. If you finish the minimum tier today, keep the line intact and avoid compensating with a bigger task tomorrow.</p></section>
+        <section class="panel side-card"><span class="eyebrow">Process assets</span><div class="grid-2" style="margin-top:12px"><div class="metric"><strong>48</strong><span>minutes read</span></div><div class="metric"><strong>12</strong><span>SEO terms mapped</span></div></div></section>
+      </aside>
+    </section>
+  </main>
+</div>
+<nav class="mobile-bar"><a class="active" href="dashboard.html">Today</a><a href="goals.html">Goals</a><a href="assessment.html">Assess</a><a href="settings.html">Settings</a></nav>
+<div class="panel toast" id="toast"><strong>Task logged.</strong><p>The selected tier was saved for today. Your line stays intact.</p></div>
+<script>
+const taskData = [
+  { title: 'Reading base training', meta: 'Main training · L3 keep-going phase', tiers: ['Read 30 minutes and capture 3 notes','Read 10 minutes with one highlight','Open the book and read 2 pages'] },
+  { title: 'SEO growth goal', meta: 'Classified goal · week 2 of 6', tiers: ['Cluster 20 keywords around one intent','Review 5 keywords and mark difficulty','Write down one keyword opportunity'] },
+  { title: 'Daily review', meta: 'Recovery capacity', tiers: ['Write a 6-line review with blocker and next action','Answer 3 review prompts','Mark state and choose tomorrow minimum'] }
+];
+const tasks = document.getElementById('tasks');
+function renderTasks(mode = 0) {
+  tasks.innerHTML = taskData.map((task, idx) => `<article class="card task"><div class="task-head"><div><h3>${task.title}</h3><p>${task.meta}</p></div><span class="badge ${idx === 0 ? 'badge-accent' : ''}">${idx === 0 ? 'Recommended' : 'Open'}</span></div><div class="tiers">${task.tiers.map((tier,i) => `<button class="tier ${i === mode ? 'selected' : ''}" data-log><b>${['Standard','Easy','Minimum'][i]}</b><span>${tier}</span></button>`).join('')}</div></article>`).join('');
+  document.querySelectorAll('[data-log]').forEach(btn => btn.addEventListener('click', () => { btn.closest('.tiers').querySelectorAll('.tier').forEach(t => t.classList.remove('selected')); btn.classList.add('selected'); document.getElementById('toast').classList.add('active'); setTimeout(() => document.getElementById('toast').classList.remove('active'), 2400); }));
+}
+document.querySelectorAll('.state').forEach((btn,i) => btn.addEventListener('click', () => { document.querySelectorAll('.state').forEach(s => s.classList.remove('selected')); btn.classList.add('selected'); renderTasks(Math.min(i,2)); }));
+renderTasks(0);
+</script>
+</body>
+</html>

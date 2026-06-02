@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Goals — Threadline</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  .header { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin-bottom: 24px; }
+  .header h1 { font-size: clamp(2.4rem, 5vw, 4.4rem); }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .filters button { min-height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); font-weight: 700; }
+  .filters button.active { color: var(--accent); border-color: oklch(58% 0.18 255 / 0.25); background: oklch(58% 0.18 255 / 0.08); }
+  .goal-layout { display: grid; grid-template-columns: 0.95fr 1.25fr; gap: 20px; }
+  .goal-list { display: grid; gap: 12px; }
+  .goal-item { text-align: left; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--fg); }
+  .goal-item.active { border-color: var(--accent); box-shadow: 0 0 0 3px oklch(58% 0.18 255 / 0.09); }
+  .detail { padding: 22px; }
+  .milestones { display: grid; gap: 10px; margin-top: 18px; }
+  .milestone { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px; background: var(--surface-2); border-radius: var(--radius); }
+  .template-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
+  .template { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  @media (max-width: 1060px) { .goal-layout, .template-grid { grid-template-columns: 1fr; } .header { display: grid; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar"><a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a><nav class="side-nav"><a href="dashboard.html"><span class="dot"></span>Today</a><a class="active" href="goals.html"><span class="dot" style="background:var(--accent-2)"></span>Goals</a><a href="assessment.html"><span class="dot" style="background:var(--warn)"></span>Assessment</a><a href="settings.html"><span class="dot" style="background:var(--fg)"></span>Settings</a></nav></aside>
+  <main class="main">
+    <div class="header"><div><span class="eyebrow">Classified coaching</span><h1>Goals become daily process assets.</h1></div><button class="btn btn-primary" id="newGoal">New goal</button></div>
+    <div class="filters" id="filters"><button class="active" data-filter="all">All</button><button data-filter="SEO">SEO</button><button data-filter="Learning">Learning</button><button data-filter="Writing">Writing</button><button data-filter="Movement">Movement</button></div>
+    <section class="goal-layout">
+      <div class="goal-list" id="goalList"></div>
+      <article class="panel detail" id="detail"></article>
+    </section>
+  </main>
+</div>
+<nav class="mobile-bar"><a href="dashboard.html">Today</a><a class="active" href="goals.html">Goals</a><a href="assessment.html">Assess</a><a href="settings.html">Settings</a></nav>
+<script>
+const goals = [
+  { type:'SEO', title:'Grow an independent site', progress:42, stage:'Week 2 · intent clustering', metric:'12 / 40 keywords mapped', today:'Cluster 5 terms around “focus recovery”.' },
+  { type:'Learning', title:'Finish the AI systems course', progress:28, stage:'Module 3 · retrieval notes', metric:'48 / 180 minutes logged', today:'Review one lecture and write 3 recall prompts.' },
+  { type:'Writing', title:'Publish a weekly essay', progress:55, stage:'Draft loop', metric:'2 / 4 essays shipped', today:'Outline one section from yesterday’s note.' },
+  { type:'Movement', title:'Rebuild walking habit', progress:70, stage:'Base capacity', metric:'6-day line intact', today:'Walk 15 minutes after dinner.' }
+];
+let active = 0;
+function render(filter='all') {
+  const visible = goals.map((g,i)=>({...g,i})).filter(g => filter === 'all' || g.type === filter);
+  document.getElementById('goalList').innerHTML = visible.map(g => `<button class="goal-item ${g.i === active ? 'active' : ''}" data-goal="${g.i}"><span class="badge">${g.type}</span><h3 style="margin:12px 0 8px">${g.title}</h3><p>${g.stage}</p><div class="progress" style="margin-top:14px"><span style="width:${g.progress}%"></span></div></button>`).join('');
+  document.querySelectorAll('[data-goal]').forEach(btn => btn.addEventListener('click', () => { active = Number(btn.dataset.goal); render(filter); }));
+  const g = goals[active];
+  document.getElementById('detail').innerHTML = `<span class="badge badge-accent">${g.type} template</span><h2 style="font-size:clamp(2rem,4vw,3.5rem);margin:14px 0">${g.title}</h2><p>${g.stage}. Threadline tracks process assets instead of only final outcomes.</p><div class="grid-2" style="margin-top:18px"><div class="metric"><strong>${g.progress}%</strong><span>stage progress</span></div><div class="metric"><strong>${g.metric.split(' ')[0]}</strong><span>${g.metric}</span></div></div><div class="milestones"><div class="milestone"><span class="dot"></span><strong>Today</strong><span>${g.today}</span></div><div class="milestone"><span class="dot" style="background:var(--accent-2)"></span><strong>Easy tier</strong><span>Reduce volume by 70%, keep the same intent.</span></div><div class="milestone"><span class="dot" style="background:var(--warn)"></span><strong>Minimum</strong><span>Record one process asset so the line remains intact.</span></div></div><h3 style="margin-top:24px">Available templates</h3><div class="template-grid"><div class="template">Reading</div><div class="template">Movement</div><div class="template">Writing</div><div class="template">Project</div><div class="template">SEO</div></div>`;
+}
+document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(btn.dataset.filter); }));
+document.getElementById('newGoal').addEventListener('click', () => alert('Prototype action: open new goal form with classified templates.'));
+render();
+</script>
+</body>
+</html>

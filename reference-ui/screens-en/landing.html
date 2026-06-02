@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Threadline is an AI-powered long-term goal training system for people who know what they want but struggle to execute consistently.">
+<title>Threadline — AI Goal Training That Does Not Break</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  body {
+    background:
+      radial-gradient(circle at 18% 8%, oklch(58% 0.18 255 / 0.13), transparent 25rem),
+      radial-gradient(circle at 86% 22%, oklch(58% 0.14 160 / 0.11), transparent 24rem),
+      linear-gradient(180deg, oklch(98.5% 0.006 245), oklch(96.8% 0.012 238) 58%, oklch(98% 0.005 250));
+  }
+  .hero { padding: clamp(54px, 9vw, 108px) 0 54px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(350px, 0.72fr); gap: clamp(30px, 6vw, 76px); align-items: center; }
+  h1 { font-size: clamp(3.2rem, 8.8vw, 7.4rem); max-width: 940px; }
+  .lead { margin-top: 24px; font-size: clamp(1.08rem, 2vw, 1.32rem); max-width: 660px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+  .product-shot {
+    padding: 16px;
+    background:
+      linear-gradient(180deg, oklch(100% 0 0 / 0.88), oklch(98% 0.014 245 / 0.82)),
+      radial-gradient(circle at top right, oklch(58% 0.18 255 / 0.16), transparent 18rem);
+  }
+  .shot-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .today-list { display: grid; gap: 10px; }
+  .today-item { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .today-item h3 { font-size: 0.98rem; }
+  .today-item p { margin-top: 5px; font-size: 0.82rem; }
+  .section { padding: clamp(52px, 8vw, 92px) 0; }
+  .section-head { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(280px, 0.5fr); gap: 30px; align-items: end; margin-bottom: 28px; }
+  .section h2 { font-size: clamp(2rem, 5vw, 4.3rem); max-width: 780px; }
+  .problem-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .problem { padding: 20px; min-height: 230px; background: oklch(100% 0 0 / 0.82); }
+  .problem:nth-child(1) { border-color: oklch(67% 0.16 78 / 0.24); background: linear-gradient(180deg, oklch(67% 0.16 78 / 0.08), oklch(100% 0 0 / 0.86)); }
+  .problem:nth-child(2) { border-color: oklch(58% 0.18 255 / 0.20); background: linear-gradient(180deg, oklch(58% 0.18 255 / 0.07), oklch(100% 0 0 / 0.86)); }
+  .problem:nth-child(3) { border-color: oklch(58% 0.14 160 / 0.22); background: linear-gradient(180deg, oklch(58% 0.14 160 / 0.07), oklch(100% 0 0 / 0.86)); }
+  .problem:nth-child(4) { border-color: oklch(57% 0.18 25 / 0.18); background: linear-gradient(180deg, oklch(57% 0.18 25 / 0.055), oklch(100% 0 0 / 0.86)); }
+  .problem h3 { margin: 16px 0 10px; font-size: 1.12rem; }
+  .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .loop-step { padding: 18px; position: relative; min-height: 184px; background: oklch(100% 0 0 / 0.78); }
+  .loop-step .num { font: 760 0.78rem/1 var(--font-mono); color: var(--accent); }
+  .loop-step h3 { margin: 24px 0 10px; font-size: 1.06rem; }
+  .audience { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .audience .card { padding: 22px; background: oklch(100% 0 0 / 0.80); }
+  .cta {
+    margin: 40px auto 76px;
+    padding: clamp(28px, 5vw, 54px);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 28px;
+    align-items: center;
+    background:
+      radial-gradient(circle at 12% 0%, oklch(58% 0.18 255 / 0.16), transparent 18rem),
+      linear-gradient(135deg, oklch(100% 0 0 / 0.88), oklch(96% 0.02 245 / 0.90));
+  }
+  .site-footer {
+    border-top: 1px solid var(--border);
+    background: oklch(100% 0 0 / 0.72);
+    backdrop-filter: blur(18px);
+  }
+  .footer-inner { padding: 34px 0 42px; display: grid; grid-template-columns: minmax(260px, 1.35fr) repeat(3, minmax(130px, 0.55fr)); gap: 28px; }
+  .footer-brand { max-width: 390px; }
+  .footer-brand p { margin-top: 12px; font-size: 0.92rem; }
+  .footer-col h3 { font-size: 0.78rem; font-family: var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg); margin-bottom: 12px; }
+  .footer-col a { display: block; color: var(--muted); font-size: 0.9rem; padding: 5px 0; }
+  .footer-col a:hover { color: var(--accent); }
+  .footer-bottom { border-top: 1px solid var(--border); padding: 16px 0; display: flex; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 0.82rem; }
+  @media (max-width: 980px) {
+    .hero-grid, .section-head, .cta { grid-template-columns: 1fr; }
+    .problem-grid, .loop, .audience { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 620px) {
+    .footer-inner { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a>
+    <nav class="nav-links">
+      <a href="#loop">Loop</a><a href="#who">Who it helps</a><a href="pricing.html">Pricing</a>
+    </nav>
+    <div class="actions"><a class="btn btn-ghost" href="auth.html">Log in</a><a class="btn btn-primary" href="assessment.html">Take assessment</a></div>
+  </div>
+</header>
+
+<main>
+  <section class="container hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">AI goal training for slow-feedback work</div>
+        <h1>Stop restarting. Build a system that keeps going.</h1>
+        <p class="lead">Threadline diagnoses your execution pattern and gives you adaptive daily tasks: standard when you have energy, easy when life is busy, minimum when the only goal is not breaking the line.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="assessment.html">Get my action profile</a>
+          <a class="btn btn-secondary" href="#loop">See how it works</a>
+        </div>
+      </div>
+      <aside class="panel product-shot">
+        <div class="shot-top"><span class="eyebrow">Today</span><span class="badge badge-success">Line intact · 6 days</span></div>
+        <div class="today-list">
+          <div class="today-item"><div><h3>Reading base training</h3><p>10 minutes + 2 notes, adjusted for low energy.</p></div><span class="badge badge-accent">Easy</span></div>
+          <div class="today-item"><div><h3>SEO goal block</h3><p>Cluster 5 search terms around “focus recovery”.</p></div><span class="badge">Standard</span></div>
+          <div class="today-item"><div><h3>Recovery rule</h3><p>If missed, restart with one 5-minute action tomorrow.</p></div><span class="badge badge-warn">Protected</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="section-head">
+      <div><span class="eyebrow">The real problem</span><h2>It is not only discipline. It is feedback design.</h2></div>
+      <p>Long goals lose against short-form feeds because they pay off slowly. Threadline manufactures process feedback before the external result arrives.</p>
+    </div>
+    <div class="problem-grid">
+      <article class="card problem"><span class="badge badge-warn">Slow feedback</span><h3>You doubt the direction too early.</h3><p>Process metrics make invisible progress visible: minutes read, keywords mapped, drafts shipped, workouts completed.</p></article>
+      <article class="card problem"><span class="badge badge-warn">High stimulus</span><h3>Your attention gets bought cheaply.</h3><p>The assessment identifies temptation patterns and starts with low-stimulus training, not motivational slogans.</p></article>
+      <article class="card problem"><span class="badge badge-warn">Start friction</span><h3>You know the task, but cannot begin.</h3><p>Every plan includes a minimum action so starting is measured in minutes, not perfect conditions.</p></article>
+      <article class="card problem"><span class="badge badge-warn">Break collapse</span><h3>One missed day becomes the end.</h3><p>Recovery is designed into the system. A missed day triggers a lower tier, not shame.</p></article>
+    </div>
+  </section>
+
+  <section class="container section" id="loop">
+    <div class="section-head">
+      <div><span class="eyebrow">Product loop</span><h2>Assessment, prescription, practice, coaching, review.</h2></div>
+      <p>Threadline is not a generic to-do list. It is a training loop for the ability underneath long-term execution.</p>
+    </div>
+    <div class="loop">
+      <article class="card loop-step"><span class="num">01</span><h3>Assess</h3><p>7 dimensions: clarity, start, continuity, resistance, recovery, energy, planning.</p></article>
+      <article class="card loop-step"><span class="num">02</span><h3>Prescribe</h3><p>Main training, support training, depth, and a realistic 7-day plan.</p></article>
+      <article class="card loop-step"><span class="num">03</span><h3>Train</h3><p>Reading, movement, writing/logging, and daily review as base capacity.</p></article>
+      <article class="card loop-step"><span class="num">04</span><h3>Coach</h3><p>Goal templates for learning, writing, project work, movement, and SEO growth.</p></article>
+      <article class="card loop-step"><span class="num">05</span><h3>Adjust</h3><p>Weekly AI review changes difficulty using completion, state, and process data.</p></article>
+    </div>
+  </section>
+
+  <section class="container section" id="who">
+    <div class="section-head">
+      <div><span class="eyebrow">Who it helps</span><h2>For people with goals and unreliable execution.</h2></div>
+      <p>Students, employees, and early freelancers share the same pattern: ambition is real, but the operating system is fragile.</p>
+    </div>
+    <div class="audience">
+      <article class="card"><span class="badge">Students</span><h3>Turn studying into daily evidence.</h3><p>Reading and course plans become smaller actions with recovery rules for exams, language learning, and deep skill work.</p></article>
+      <article class="card"><span class="badge">Knowledge workers</span><h3>Protect personal goals after work.</h3><p>Use low-energy task tiers to keep writing, fitness, learning, and side projects alive during busy weeks.</p></article>
+      <article class="card"><span class="badge">Freelancers</span><h3>Ship when nobody is managing you.</h3><p>Project and SEO templates turn vague growth goals into keyword research, content, outreach, and publishing blocks.</p></article>
+      <article class="card"><span class="badge">Habit rebuilders</span><h3>Recover from broken plans faster.</h3><p>Minimum tasks and weekly review stop the common all-or-nothing loop after a missed day.</p></article>
+    </div>
+  </section>
+
+  <section class="container panel cta">
+    <div><span class="eyebrow">Start here</span><h2>Run the 5-minute diagnostic before you plan another goal.</h2><p class="lead">Get a stage, two bottlenecks, one advantage, and a first 7-day training prescription.</p></div>
+    <a class="btn btn-accent" href="assessment.html">Start free assessment</a>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a>
+      <p>AI-assisted goal training for people who keep starting over. Diagnose the pattern, protect the line, and turn long goals into daily evidence.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Product</h3>
+      <a href="assessment.html">Assessment</a>
+      <a href="dashboard.html">Today dashboard</a>
+      <a href="goals.html">Goal coaching</a>
+      <a href="pricing.html">Pricing</a>
+    </div>
+    <div class="footer-col">
+      <h3>Use cases</h3>
+      <a href="#who">Students</a>
+      <a href="#who">Knowledge workers</a>
+      <a href="#who">Freelancers</a>
+      <a href="#loop">Habit recovery</a>
+    </div>
+    <div class="footer-col">
+      <h3>Trust</h3>
+      <a href="auth.html">Google sign-in</a>
+      <a href="settings.html">Data controls</a>
+      <a href="settings.html">Export data</a>
+      <a href="../index-en.html">Prototype map</a>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 Threadline by 不断线. English product prototype.</span>
+    <span>Built for assessment-led SEO acquisition and adaptive training.</span>
+  </div>
+</footer>
+</body>
+</html>

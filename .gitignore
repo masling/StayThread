@@ -1,0 +1,11 @@
+.next/
+node_modules/
+.env*.local
+.omx/
+.playwright-mcp/
+*.tsbuildinfo
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store

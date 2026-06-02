@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Action Assessment — Threadline</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  .wrap { width: min(980px, calc(100vw - 32px)); margin: 36px auto 72px; }
+  .top { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-bottom: 22px; }
+  h1 { font-size: clamp(2.2rem, 6vw, 4.6rem); max-width: 720px; }
+  .assessment { margin-top: 24px; padding: clamp(18px, 4vw, 30px); }
+  .question { display: none; }
+  .question.active { display: block; }
+  .question h2 { font-size: clamp(1.8rem, 4vw, 3.2rem); margin: 12px 0 18px; }
+  .scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 24px; }
+  .scale button { min-height: 74px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); font-weight: 750; }
+  .scale button:hover, .scale button.selected { border-color: var(--accent); background: oklch(58% 0.18 255 / 0.07); }
+  .controls { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+  .result { display: none; margin-top: 24px; padding: clamp(18px, 4vw, 30px); }
+  .result.active { display: block; }
+  .bars { display: grid; gap: 12px; margin: 24px 0; }
+  .bar-row { display: grid; grid-template-columns: 140px 1fr 44px; gap: 12px; align-items: center; }
+  .bar-row label { font-weight: 650; font-size: 0.9rem; }
+  .plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+  .plan .card { padding: 16px; }
+  @media (max-width: 720px) {
+    .top, .plan { grid-template-columns: 1fr; display: grid; }
+    .scale { grid-template-columns: 1fr; }
+    .scale button { min-height: 48px; }
+    .bar-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner"><a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a><div class="actions"><a class="btn btn-secondary" href="auth.html">Save result</a></div></div></header>
+<main class="wrap">
+  <div class="top">
+    <div><span class="eyebrow">Action profile</span><h1>Find the bottleneck behind your stalled goal.</h1><p class="lead">Answer six fast prompts. The prototype calculates a stage and a first training prescription.</p></div>
+    <span class="badge badge-accent" id="counter">1 / 6</span>
+  </div>
+  <div class="progress"><span id="progress" style="width:16%"></span></div>
+  <section class="panel assessment" id="assessment"></section>
+  <section class="panel result" id="result"></section>
+</main>
+<script>
+const questions = [
+  { dim: 'Clarity', text: 'I can name the one long-term goal that matters most this month.' },
+  { dim: 'Start', text: 'When I know the next action, I can begin within five minutes.' },
+  { dim: 'Continuity', text: 'I can keep a plan alive even when a few days are busy.' },
+  { dim: 'Resistance', text: 'Short videos, feeds, games, or entertainment rarely pull me away from the plan.' },
+  { dim: 'Recovery', text: 'If I miss a day, I return with a smaller action instead of dropping the plan.' },
+  { dim: 'Planning', text: 'I can turn a big goal into concrete tasks for today.' }
+];
+let current = 0;
+const answers = Array(questions.length).fill(3);
+const assessment = document.getElementById('assessment');
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('counter').textContent = `${current + 1} / ${questions.length}`;
+  document.getElementById('progress').style.width = `${((current + 1) / questions.length) * 100}%`;
+  assessment.innerHTML = `<article class="question active"><span class="badge">${q.dim}</span><h2>${q.text}</h2><p>1 means strongly disagree. 5 means strongly agree.</p><div class="scale">${[1,2,3,4,5].map(v => `<button class="${answers[current] === v ? 'selected' : ''}" data-score="${v}">${v}</button>`).join('')}</div><div class="controls"><button class="btn btn-secondary" ${current === 0 ? 'disabled' : ''} id="prev">Back</button><button class="btn btn-primary" id="next">${current === questions.length - 1 ? 'Show result' : 'Next'}</button></div></article>`;
+  assessment.querySelectorAll('[data-score]').forEach(btn => btn.addEventListener('click', () => { answers[current] = Number(btn.dataset.score); renderQuestion(); }));
+  assessment.querySelector('#prev').addEventListener('click', () => { if (current > 0) { current--; renderQuestion(); } });
+  assessment.querySelector('#next').addEventListener('click', () => { if (current < questions.length - 1) { current++; renderQuestion(); } else renderResult(); });
+}
+function renderResult() {
+  assessment.style.display = 'none';
+  const score = Math.round(answers.reduce((a,b) => a + b, 0) / (questions.length * 5) * 100);
+  const minIndex = answers.indexOf(Math.min(...answers));
+  const stage = score < 45 ? 'L1 Reset' : score < 64 ? 'L2 Start' : score < 78 ? 'L3 Keep-going' : 'L4 Compound';
+  const result = document.getElementById('result');
+  result.classList.add('active');
+  result.innerHTML = `<span class="eyebrow">Your result</span><h2 style="font-size:clamp(2rem,5vw,4rem);margin:10px 0">${stage}</h2><p>Your strongest need right now is <strong style="color:var(--fg)">${questions[minIndex].dim.toLowerCase()} training</strong>. Start with a plan that protects continuity before increasing intensity.</p><div class="bars">${questions.map((q,i) => `<div class="bar-row"><label>${q.dim}</label><div class="progress"><span style="width:${answers[i]*20}%"></span></div><span class="mono">${answers[i]*20}</span></div>`).join('')}</div><div class="plan"><article class="card"><span class="badge badge-accent">Main training</span><h3>5-minute start</h3><p>Begin each session with one tiny action before judging motivation.</p></article><article class="card"><span class="badge badge-success">Minimum line</span><h3>Protected task</h3><p>A 2-minute fallback counts as success on low-energy days.</p></article><article class="card"><span class="badge badge-warn">7-day plan</span><h3>No intensity jump</h3><p>Keep the same small goal for one week, then review.</p></article></div><div class="controls"><a class="btn btn-primary" href="auth.html">Create account to save</a><a class="btn btn-secondary" href="dashboard.html">Preview dashboard</a></div>`;
+}
+renderQuestion();
+</script>
+</body>
+</html>

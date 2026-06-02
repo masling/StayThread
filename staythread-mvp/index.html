@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StayThread MVP</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233d6df2'/%3E%3Cpath d='M9 11h14M9 16h14M9 21h10' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" data-app-chrome>
+      <a class="brand" href="#landing" data-route="landing" aria-label="StayThread home">
+        <span class="brand-mark"></span>
+        <span>StayThread</span>
+      </a>
+      <nav class="side-nav" aria-label="Primary">
+        <a href="#landing" data-route="landing"><span class="nav-dot nav-dot-gray"></span>Public</a>
+        <a href="#today" data-route="today" class="active"><span class="nav-dot"></span>Today</a>
+        <a href="#assessment" data-route="assessment"><span class="nav-dot nav-dot-warn"></span>Assessment</a>
+        <a href="#goals" data-route="goals"><span class="nav-dot nav-dot-green"></span>Goals</a>
+        <a href="#training" data-route="training"><span class="nav-dot nav-dot-dark"></span>Training</a>
+        <a href="#review" data-route="review"><span class="nav-dot nav-dot-blue"></span>Review</a>
+        <a href="#settings" data-route="settings"><span class="nav-dot nav-dot-gray"></span>Settings</a>
+      </nav>
+      <section class="sidebar-card">
+        <span class="label">Current thread</span>
+        <strong id="sidebarStage">L2 Starter</strong>
+        <p id="sidebarDepth">D1 Recovery depth</p>
+      </section>
+    </aside>
+
+    <main class="main">
+      <section class="view public-view active" id="view-landing" aria-labelledby="landing-title">
+        <header class="public-nav">
+          <a class="brand" href="#landing" data-route="landing" aria-label="StayThread home">
+            <span class="brand-mark"></span>
+            <span>StayThread</span>
+          </a>
+          <nav aria-label="Public">
+            <button class="btn btn-secondary" data-route="assessment">Try assessment</button>
+            <button class="btn btn-primary" data-route="auth">Sign in</button>
+          </nav>
+        </header>
+        <section class="landing-hero">
+          <div class="hero-copy">
+            <span class="label">AI goal training for slow-feedback work</span>
+            <h1 id="landing-title">Stop restarting. Build a system that keeps going.</h1>
+            <p>StayThread diagnoses your execution pattern and gives you adaptive daily tasks: standard when you have energy, easy when life is busy, minimum when the only goal is not breaking the line.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" data-route="assessment">Get my action profile</button>
+              <a class="btn btn-secondary" href="#product-loop">See how it works</a>
+            </div>
+          </div>
+          <aside class="hero-preview panel">
+            <div class="preview-top">
+              <span class="label">Today</span>
+              <span class="badge badge-green">Line intact · 6 days</span>
+            </div>
+            <div class="preview-list">
+              <div class="preview-task">
+                <div><strong>Reading base training</strong><span>10 minutes + 2 notes, adjusted for low energy.</span></div>
+                <em>Easy</em>
+              </div>
+              <div class="preview-task">
+                <div><strong>SEO goal block</strong><span>Cluster 5 search terms around "focus recovery".</span></div>
+                <em>Standard</em>
+              </div>
+              <div class="preview-task">
+                <div><strong>Recovery rule</strong><span>If missed, restart with one 5-minute action tomorrow.</span></div>
+                <em>Protected</em>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="landing-section">
+          <div class="landing-section-head">
+            <div>
+              <span class="label">The real problem</span>
+              <h2>It is not only discipline. It is feedback design.</h2>
+            </div>
+            <p>Long goals lose against short-form feeds because they pay off slowly. StayThread manufactures process feedback before the external result arrives.</p>
+          </div>
+          <div class="problem-grid">
+            <article class="problem-card">
+              <span class="badge">Slow feedback</span>
+              <h3>You doubt the direction too early.</h3>
+              <p>Process metrics make invisible progress visible: minutes read, keywords mapped, drafts shipped, workouts completed.</p>
+            </article>
+            <article class="problem-card">
+              <span class="badge">High stimulus</span>
+              <h3>Your attention gets bought cheaply.</h3>
+              <p>The assessment identifies temptation patterns and starts with low-stimulation training, not motivational slogans.</p>
+            </article>
+            <article class="problem-card">
+              <span class="badge">Start friction</span>
+              <h3>You know the task, but cannot begin.</h3>
+              <p>Every plan includes a minimum action so starting is measured in minutes, not perfect conditions.</p>
+            </article>
+            <article class="problem-card">
+              <span class="badge">Break collapse</span>
+              <h3>One missed day becomes the end.</h3>
+              <p>Recovery is designed into the system. A missed day triggers a lower tier, not shame.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="landing-section" id="product-loop">
+          <div class="landing-section-head">
+            <div>
+              <span class="label">Product loop</span>
+              <h2>Assessment, prescription, practice, coaching, review.</h2>
+            </div>
+            <p>StayThread is not a generic to-do list. It is a training loop for the ability underneath long-term execution.</p>
+          </div>
+          <div class="loop-grid">
+            <article class="loop-step"><span>01</span><h3>Assess</h3><p>7 dimensions: clarity, start, continuity, resistance, recovery, energy, planning.</p></article>
+            <article class="loop-step"><span>02</span><h3>Prescribe</h3><p>Main training, support training, depth, and a realistic 7-day plan.</p></article>
+            <article class="loop-step"><span>03</span><h3>Train</h3><p>Reading, movement, writing/logging, and daily review as base capacity.</p></article>
+            <article class="loop-step"><span>04</span><h3>Coach</h3><p>Goal templates for learning, writing, project work, movement, and SEO growth.</p></article>
+            <article class="loop-step"><span>05</span><h3>Adjust</h3><p>Weekly AI review changes difficulty using completion, state, and process data.</p></article>
+          </div>
+        </section>
+
+        <section class="landing-section" id="who">
+          <div class="landing-section-head">
+            <div>
+              <span class="label">Who it helps</span>
+              <h2>For people with goals and unreliable execution.</h2>
+            </div>
+            <p>Students, employees, and early freelancers share the same pattern: ambition is real, but the operating system is fragile.</p>
+          </div>
+          <div class="audience-grid">
+            <article><span class="badge">Students</span><h3>Turn studying into daily evidence.</h3><p>Reading and course plans become smaller actions with recovery rules for exams, language learning, and deep skill work.</p></article>
+            <article><span class="badge">Knowledge workers</span><h3>Protect personal goals after work.</h3><p>Use low-energy task tiers to keep writing, fitness, learning, and side projects alive during busy weeks.</p></article>
+            <article><span class="badge">Freelancers</span><h3>Ship when nobody is managing you.</h3><p>Project and SEO templates turn vague growth goals into keyword research, content, outreach, and publishing blocks.</p></article>
+            <article><span class="badge">Habit rebuilders</span><h3>Recover from broken plans faster.</h3><p>Minimum tasks and weekly review stop the common all-or-nothing loop after a missed day.</p></article>
+          </div>
+        </section>
+
+        <section class="landing-cta panel">
+          <div>
+            <span class="label">Start here</span>
+            <h2>Run the 5-minute diagnostic before you plan another goal.</h2>
+            <p>Get a stage, two bottlenecks, one advantage, and a first 7-day training prescription.</p>
+          </div>
+          <button class="btn btn-primary" data-route="assessment">Start free assessment</button>
+        </section>
+
+        <footer class="landing-footer">
+          <div>
+            <a class="brand" href="#landing" data-route="landing" aria-label="StayThread home">
+              <span class="brand-mark"></span>
+              <span>StayThread</span>
+            </a>
+            <p>AI-assisted goal training for people who keep starting over. Diagnose the pattern, protect the line, and turn long goals into daily evidence.</p>
+          </div>
+          <div>
+            <h3>Product</h3>
+            <button data-route="assessment">Assessment</button>
+            <button data-route="today">Today dashboard</button>
+            <button data-route="goals">Goal coaching</button>
+          </div>
+          <div>
+            <h3>Use cases</h3>
+            <a href="#who">Students</a>
+            <a href="#who">Knowledge workers</a>
+            <a href="#who">Freelancers</a>
+          </div>
+        </footer>
+      </section>
+
+      <section class="view public-view" id="view-auth" aria-labelledby="auth-title">
+        <header class="public-nav">
+          <a class="brand" href="#landing" data-route="landing" aria-label="StayThread home">
+            <span class="brand-mark"></span>
+            <span>StayThread</span>
+          </a>
+          <nav aria-label="Auth">
+            <button class="btn btn-secondary" data-route="landing">Back</button>
+          </nav>
+        </header>
+        <section class="auth-layout">
+          <div>
+            <span class="label">Account</span>
+            <h1 id="auth-title">Save the assessment when the plan feels right.</h1>
+            <p>You can test the flow first. Registration appears after the result so users understand the value before creating an account.</p>
+          </div>
+          <form class="panel auth-card" id="authForm">
+            <label>Email<input type="email" value="builder@example.com" autocomplete="email"></label>
+            <label>Password<input type="password" value="staythread" autocomplete="current-password"></label>
+            <button class="btn btn-primary" type="submit">Sign in and preview app</button>
+            <button class="btn btn-secondary" type="button" data-route="assessment">Try assessment first</button>
+          </form>
+        </section>
+      </section>
+
+      <section class="view" id="view-today" aria-labelledby="today-title">
+        <div class="page-head">
+          <div>
+            <span class="label">Today</span>
+            <h1 id="today-title">Keep the chain from breaking.</h1>
+            <p>The day is successful when one meaningful line stays intact.</p>
+          </div>
+          <button class="btn btn-secondary" data-route="assessment">Retake assessment</button>
+        </div>
+
+        <div class="today-grid">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <span class="label">Daily state</span>
+                <h2>How much depth can today hold?</h2>
+              </div>
+              <span class="badge" id="stateRecommendation">Easy recommended</span>
+            </div>
+            <div class="state-grid" id="stateGrid"></div>
+          </section>
+
+          <section class="panel task-panel">
+            <div class="section-head">
+              <div>
+                <span class="label">Three-tier task set</span>
+                <h2>Choose the line that fits today.</h2>
+              </div>
+              <span class="badge badge-blue" id="taskFocus">Recovery focus</span>
+            </div>
+            <div id="taskStack" class="task-stack"></div>
+          </section>
+
+          <aside class="right-rail">
+            <section class="panel compact">
+              <span class="label">Line status</span>
+              <div class="metric-row">
+                <strong id="chainDays">6</strong>
+                <span>valid days this week</span>
+              </div>
+              <div class="week-line" id="weekLine"></div>
+            </section>
+            <section class="panel compact">
+              <span class="label">Coach note</span>
+              <h3 id="coachHeadline">Protect continuity before volume.</h3>
+              <p id="coachNote">A minimum task counts as a protected day. Do not compensate tomorrow; return with a realistic next action.</p>
+            </section>
+            <section class="panel compact">
+              <span class="label">Process assets</span>
+              <div class="asset-grid" id="assetGrid"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="view-assessment" aria-labelledby="assessment-title">
+        <div class="page-head">
+          <div>
+            <span class="label">Action profile</span>
+            <h1 id="assessment-title">Find the bottleneck behind the stalled goal.</h1>
+            <p>Answer 30 short prompts. StayThread turns scores into a stage, depth, and 7-day prescription.</p>
+          </div>
+          <span class="badge badge-blue" id="questionCounter">1 / 30</span>
+        </div>
+        <div class="progress"><span id="assessmentProgress"></span></div>
+        <section class="panel assessment-card" id="assessmentCard"></section>
+        <section class="panel result-card" id="resultCard" hidden></section>
+      </section>
+
+      <section class="view" id="view-goals" aria-labelledby="goals-title">
+        <div class="page-head">
+          <div>
+            <span class="label">Category companion</span>
+            <h1 id="goals-title">Long-term goals become process assets.</h1>
+            <p>Templates keep tasks professional and realistic instead of generic.</p>
+          </div>
+          <button class="btn btn-primary" id="createGoalButton">Create goal</button>
+        </div>
+        <div class="goal-layout">
+          <section class="goal-list" id="goalList"></section>
+          <section class="panel goal-detail" id="goalDetail"></section>
+        </div>
+      </section>
+
+      <section class="view" id="view-training" aria-labelledby="training-title">
+        <div class="page-head">
+          <div>
+            <span class="label">Foundational training</span>
+            <h1 id="training-title">Build the ability to stay with slow feedback.</h1>
+            <p>Reading, movement, writing, and daily review train the base capacity behind long-term action.</p>
+          </div>
+        </div>
+        <div class="module-grid" id="moduleGrid"></div>
+      </section>
+
+      <section class="view" id="view-review" aria-labelledby="review-title">
+        <div class="page-head">
+          <div>
+            <span class="label">Daily review</span>
+            <h1 id="review-title">Close the day without overthinking it.</h1>
+            <p>Two minutes is enough. Capture what moved, what interrupted, and tomorrow's minimum action.</p>
+          </div>
+        </div>
+        <section class="panel review-form">
+          <label>What moved forward today?<textarea id="movedForward">Read 10 minutes and mapped one keyword cluster.</textarea></label>
+          <label>What interrupted or reduced progress?<textarea id="interruption">Energy dipped after lunch, so I chose the easy tier.</textarea></label>
+          <label>What is tomorrow's minimum action?<textarea id="tomorrowMinimum">Open the keyword sheet and mark one next term.</textarea></label>
+          <button class="btn btn-primary" id="reviewButton">Generate review</button>
+        </section>
+        <section class="panel compact review-output" id="reviewOutput">
+          <span class="label">Coach feedback</span>
+          <p>Choose "Generate review" to create a short supportive summary.</p>
+        </section>
+      </section>
+
+      <section class="view" id="view-settings" aria-labelledby="settings-title">
+        <div class="page-head">
+          <div>
+            <span class="label">Trust and control</span>
+            <h1 id="settings-title">Profile data stays editable.</h1>
+            <p>StayThread should collect only what affects the selected goal or training module.</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <section class="panel settings-card">
+            <h2>Profile</h2>
+            <label>Daily available minutes<input id="availableMinutes" type="number" value="35"></label>
+            <label>Preferred time<select id="preferredTime"><option>Morning</option><option selected>Afternoon</option><option>Evening</option></select></label>
+            <label>Primary goal context<input id="goalContext" value="Independent builder working on SEO and product publishing"></label>
+          </section>
+          <section class="panel settings-card">
+            <h2>Privacy controls</h2>
+            <button class="btn btn-secondary">Export profile data</button>
+            <button class="btn btn-secondary">Delete progress logs</button>
+            <button class="btn btn-danger">Delete account</button>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile primary">
+    <a href="#landing" data-route="landing">Home</a>
+    <a href="#today" data-route="today" class="active">Today</a>
+    <a href="#assessment" data-route="assessment">Assess</a>
+    <a href="#goals" data-route="goals">Goals</a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

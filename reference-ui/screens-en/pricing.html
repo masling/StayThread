@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Threadline pricing for AI long-term goal training: free assessment, Pro coaching, and team accountability.">
+<title>Pricing — Threadline</title>
+<link rel="stylesheet" href="../css/tokens-en.css">
+<style>
+  .hero { padding: 64px 0 34px; text-align: center; }
+  .hero h1 { font-size: clamp(2.8rem, 7vw, 6rem); max-width: 880px; margin: 0 auto; }
+  .hero p { margin: 20px auto 0; max-width: 620px; font-size: 1.12rem; }
+  .toggle { width: fit-content; margin: 28px auto 0; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+  .toggle button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-weight: 740; }
+  .toggle button.active { background: var(--fg); color: white; }
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 30px 0 76px; }
+  .plan { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+  .plan.featured { border-color: var(--accent); box-shadow: var(--shadow); }
+  .price { font: 760 3rem/1 var(--font-display); letter-spacing: -0.04em; }
+  .price small { font-size: 0.95rem; color: var(--muted); font-weight: 500; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; color: var(--muted); }
+  li::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); margin-right: 10px; }
+  .faq { padding-bottom: 80px; display: grid; grid-template-columns: 0.7fr 1fr; gap: 30px; }
+  details { padding: 18px 0; border-bottom: 1px solid var(--border); }
+  summary { cursor: pointer; font-weight: 760; }
+  details p { margin-top: 10px; }
+  @media (max-width: 900px) { .plans, .faq { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="nav"><div class="container nav-inner"><a class="brand" href="../index-en.html"><span class="brand-mark"></span><span>Threadline</span></a><nav class="nav-links"><a href="landing.html">Product</a><a href="assessment.html">Assessment</a><a href="auth.html">Sign in</a></nav><a class="btn btn-primary" href="assessment.html">Start free</a></div></header>
+<main class="container">
+  <section class="hero">
+    <span class="eyebrow">Pricing</span>
+    <h1>Start with the assessment. Pay when the coaching loop matters.</h1>
+    <p>Threadline is priced for personal long-term work first, with a team tier for small accountability groups, schools, and coaching programs.</p>
+    <div class="toggle"><button class="active" data-period="monthly">Monthly</button><button data-period="yearly">Yearly · 20% off</button></div>
+  </section>
+  <section class="plans">
+    <article class="card plan"><span class="badge">Free</span><h2>Diagnostic</h2><div class="price">$0</div><p>For trying the action profile and one basic training line.</p><ul><li>Action assessment</li><li>One active goal</li><li>Basic daily task tiers</li><li>Weekly rule-based review</li></ul><a class="btn btn-secondary btn-wide" href="assessment.html">Start assessment</a></article>
+    <article class="card plan featured"><span class="badge badge-accent">Most useful</span><h2>Pro</h2><div class="price" id="proPrice">$9 <small>/ month</small></div><p>For students, workers, and freelancers who need adaptive AI coaching.</p><ul><li>Unlimited personal goals</li><li>AI goal decomposition</li><li>Daily adaptive task tiering</li><li>Weekly AI review and difficulty reset</li><li>Focus source tracking</li></ul><a class="btn btn-primary btn-wide" href="auth.html">Start 14-day trial</a></article>
+    <article class="card plan"><span class="badge">Team</span><h2>Coach</h2><div class="price" id="teamPrice">$19 <small>/ seat</small></div><p>For guided cohorts, small teams, and accountability programs.</p><ul><li>Team dashboard</li><li>Shared templates</li><li>Private progress summaries</li><li>Coach review notes</li><li>Exportable reports</li></ul><a class="btn btn-secondary btn-wide" href="auth.html">Create team trial</a></article>
+  </section>
+  <section class="faq">
+    <div><span class="eyebrow">FAQ</span><h2 style="font-size:clamp(2rem,4vw,3.6rem);margin-top:12px">Built for recovery, not punishment.</h2></div>
+    <div>
+      <details open><summary>Is this a habit tracker?</summary><p>No. Habit tracking is one module. The core product is assessment, prescription, classified goal coaching, and review adjustment.</p></details>
+      <details><summary>Can I use it before registering?</summary><p>Yes. The assessment can be completed first. Registration saves the result and creates the first training plan.</p></details>
+      <details><summary>Does Threadline diagnose medical or mental health conditions?</summary><p>No. It avoids medical, addiction, and psychological diagnosis. It focuses on action planning and goal training.</p></details>
+    </div>
+  </section>
+</main>
+<script>
+document.querySelectorAll('[data-period]').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const yearly = btn.dataset.period === 'yearly';
+  document.getElementById('proPrice').innerHTML = yearly ? '$86 <small>/ year</small>' : '$9 <small>/ month</small>';
+  document.getElementById('teamPrice').innerHTML = yearly ? '$182 <small>/ seat / year</small>' : '$19 <small>/ seat</small>';
+}));
+</script>
+</body>
+</html>
