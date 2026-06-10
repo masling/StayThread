@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310 72" role="img" aria-labelledby="title desc">
+  <title id="title">StayThread logo</title>
+  <desc id="desc">StayThread wordmark with a continuous thread action mark.</desc>
+  <defs>
+    <linearGradient id="thread" x1="10" y1="10" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3f6ff2"/>
+      <stop offset="0.58" stop-color="#3978dc"/>
+      <stop offset="1" stop-color="#2f9d75"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="64" height="64" rx="16" fill="#f7fafc"/>
+  <path d="M21 40c0-10 7-18 17-18 8 0 14 5 14 12 0 6-4 10-10 10H28c-5 0-9 3-9 8 0 4 3 7 8 7 7 0 13-4 18-12l6-10" fill="none" stroke="url(#thread)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="36" cy="36" r="8" fill="#ffffff" stroke="#1f2937" stroke-width="2.5"/>
+  <path d="M33 36.5l2.2 2.2L40 33.5" fill="none" stroke="#2f9d75" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="84" y="45" fill="#1f2937" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif" font-size="34" font-weight="760" letter-spacing="0">StayThread</text>
+  <path d="M86 55h160" stroke="#d8e0ea" stroke-width="2" stroke-linecap="round"/>
+</svg>

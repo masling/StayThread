@@ -59,7 +59,7 @@ export async function ensureProfile(supabase: SupabaseClient, prototypeUserId: s
         timezone: "America/Los_Angeles",
         daily_available_minutes: 35,
         preferred_time: "Afternoon",
-        goal_context: "Independent builder working on SEO and product publishing",
+        goal_context: "Solo international site owner doing keyword analysis and SEO backlink work",
       },
       { onConflict: "prototype_user_id", ignoreDuplicates: false },
     )
@@ -82,6 +82,37 @@ export async function linkProfileToAuthUser(supabase: SupabaseClient, profile: P
   return data as ProfileRow;
 }
 
+export async function ensureTaskCategories(supabase: SupabaseClient) {
+  const descriptionByCode: Record<string, string> = {
+    seo: "Count-only SEO/Growth workflow for solo international site owners.",
+    keyword_research: "Manual Semrush, Ahrefs, and Trends keyword analysis workload tracking.",
+    backlink_work: "Manual backlink channel and normal-site prospect screening workload tracking.",
+    content_pipeline: "Private content idea and brief pipeline tracking from keyword work.",
+  };
+
+  const { error } = await supabase.from("task_categories").upsert(
+    categoryTemplates.map((category) => ({
+      code: category.code,
+      name: category.label,
+      description: descriptionByCode[category.code] ?? `${category.label} workflow.`,
+      required_fields: [],
+      optional_fields: [],
+      process_metrics: category.metric.split(", "),
+      decomposition_rules: {
+        standard: "Full count-only work block",
+        easy: "Reduced count-only work block",
+        minimum: "Keep-alive action",
+      },
+      risk_rules: { privacy_mode: "count_only", no_ai_targets: true },
+      prompt_notes: "Do not ask for real keywords, backlink URLs, domains, or outreach recipients.",
+      is_active: true,
+    })),
+    { onConflict: "code" },
+  );
+
+  if (error) throw new Error(error.message);
+}
+
 export async function updateProfile(
   supabase: SupabaseClient,
   profile: ProfileRow,
@@ -99,6 +130,8 @@ export async function updateProfile(
 }
 
 export async function ensureSeedGoals(supabase: SupabaseClient, profile: ProfileRow) {
+  await ensureTaskCategories(supabase);
+
   const { data: existing, error: existingError } = await supabase
     .from("goals")
     .select("*")
@@ -226,7 +259,7 @@ export async function ensureSubscription(supabase: SupabaseClient, profile: Prof
       trial_started_at: trialStartedAt,
       trial_months: trialMonths,
       current_period_end: currentPeriodEnd,
-      feature_flags: { weekly_review: true, task_generation: true },
+      feature_flags: { weekly_review: true, task_generation: true, count_only_seo_tracking: true },
       },
       { onConflict: "profile_id" },
     )

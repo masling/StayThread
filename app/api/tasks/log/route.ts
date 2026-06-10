@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveRequestProfile } from "@/lib/request-context";
 import { attachPrototypeSession } from "@/lib/session";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { sanitizeSeoWorkEvidence } from "@/lib/staythread-domain";
 import { jsonError } from "@/app/api/_utils";
 
 export async function POST(request: NextRequest) {
@@ -14,9 +15,13 @@ export async function POST(request: NextRequest) {
       valueData?: Record<string, unknown>;
     };
     if (!body.taskId || !body.level) return jsonError(new Error("taskId and level are required."), 400);
+    if (!["standard", "easy", "minimum"].includes(body.level)) {
+      return jsonError(new Error("level must be standard, easy, or minimum."), 400);
+    }
 
     const supabase = getSupabaseAdmin();
     const { prototypeSession: session, profile } = await resolveRequestProfile(request, supabase);
+    const valueData = sanitizeSeoWorkEvidence(body.valueData);
 
     const { error: updateError } = await supabase
       .from("daily_tasks")
@@ -35,7 +40,7 @@ export async function POST(request: NextRequest) {
         task_id: body.taskId,
         task_level: body.level,
         completion_status: "completed",
-        value_data: body.valueData ?? {},
+        value_data: valueData,
         notes: body.notes ?? "",
       })
       .select("*")

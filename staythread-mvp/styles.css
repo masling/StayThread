@@ -128,16 +128,16 @@ body.public-mode .main {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-height: 40px;
   font-weight: 760;
   letter-spacing: 0;
 }
 
 .brand-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), var(--green));
-  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.36);
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  background: url("/mark.svg") center / contain no-repeat;
 }
 
 .side-nav {

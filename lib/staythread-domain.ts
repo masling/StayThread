@@ -40,7 +40,7 @@ export const assessmentQuestions: Array<{ dimension: Dimension; text: string }> 
   { dimension: "Planning ability", text: "I can tell the difference between planning and actually moving forward." },
   { dimension: "Planning ability", text: "I can choose the next action without redesigning the whole plan." },
   { dimension: "Consistency", text: "I can accept slow progress if the process is clearly accumulating." },
-  { dimension: "Recovery ability", text: "A minimum action still feels like a valid way to keep the goal alive." },
+  { dimension: "Recovery ability", text: "A keep-alive action still feels like a valid way to keep the goal alive." },
 ];
 
 export type AssessmentResult = {
@@ -106,26 +106,66 @@ export function scoreAssessment(answers: number[]): AssessmentResult {
 export const seedGoals = [
   {
     category_code: "seo",
-    title: "Grow an independent site",
-    description: "Build search demand with focused keyword clusters and publishing loops.",
+    title: "Grow an English independent site",
+    description: "Keep keyword analysis and SEO backlink work moving without storing private keywords or URLs.",
     progress: 42,
-    process_assets: { keywords: 12, briefs: 2, internal_links: 4 },
+    process_assets: { tools_opened: 5, keywords_analyzed: 240, usable_keywords_found: 18, backlink_channels_screened: 6 },
   },
   {
-    category_code: "writing",
-    title: "Publish a weekly essay",
-    description: "Turn notes into shipped public writing.",
-    progress: 55,
-    process_assets: { drafts: 2, outlines: 4, shipped_posts: 2 },
+    category_code: "keyword_research",
+    title: "Build a keyword discovery routine",
+    description: "Use Semrush, Ahrefs, or Google Trends to analyze sites, seed terms, and keyword rows.",
+    progress: 35,
+    process_assets: { competitor_sites_analyzed: 12, seed_terms_analyzed: 8, keywords_analyzed: 240, usable_keywords_found: 18 },
   },
   {
-    category_code: "movement",
-    title: "Rebuild walking habit",
-    description: "Rebuild gentle movement capacity without punishment.",
-    progress: 70,
-    process_assets: { walks: 6, minutes: 105, comfort_notes: 3 },
+    category_code: "backlink_work",
+    title: "Screen normal backlink opportunities",
+    description: "Find application channels and normal content sites while avoiding spam link farms.",
+    progress: 28,
+    process_assets: { backlink_channels_screened: 6, normal_site_prospects_counted: 4, outreach_attempts_logged: 1 },
   },
 ];
+
+export const seoWorkMetricKeys = [
+  "tools_opened",
+  "competitor_sites_analyzed",
+  "seed_terms_analyzed",
+  "keywords_analyzed",
+  "usable_keywords_found",
+  "backlink_channels_screened",
+  "normal_site_prospects_counted",
+  "outreach_attempts_logged",
+  "followups_logged",
+] as const;
+
+export type SeoWorkMetricKey = (typeof seoWorkMetricKeys)[number];
+export type SeoWorkEvidence = Record<SeoWorkMetricKey, number> & { privacy_mode: "count_only" };
+
+export function sanitizeSeoWorkEvidence(input: Record<string, unknown> | null | undefined): SeoWorkEvidence {
+  const evidence = Object.fromEntries(
+    seoWorkMetricKeys.map((key) => {
+      const rawValue = input?.[key];
+      const value = typeof rawValue === "number" ? rawValue : Number(rawValue ?? 0);
+      return [key, Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0];
+    }),
+  ) as Record<SeoWorkMetricKey, number>;
+
+  return { ...evidence, privacy_mode: "count_only" };
+}
+
+export function defaultProcessAssetsForCategory(categoryCode: string): Record<string, number> {
+  if (categoryCode === "keyword_research") {
+    return { competitor_sites_analyzed: 0, seed_terms_analyzed: 0, keywords_analyzed: 0, usable_keywords_found: 0 };
+  }
+  if (categoryCode === "backlink_work") {
+    return { backlink_channels_screened: 0, normal_site_prospects_counted: 0, outreach_attempts_logged: 0, followups_logged: 0 };
+  }
+  if (categoryCode === "content_pipeline") {
+    return { page_ideas_created: 0, briefs_created: 0, internal_link_ideas: 0 };
+  }
+  return { tools_opened: 0, keywords_analyzed: 0, usable_keywords_found: 0, backlink_channels_screened: 0 };
+}
 
 export type TaskPrescription = {
   goal_id: string | null;
@@ -145,73 +185,79 @@ export type GoalLike = {
 };
 
 export const categoryTemplates = [
-  { code: "seo", label: "SEO Growth", metric: "keywords, briefs, internal links" },
-  { code: "writing", label: "Writing", metric: "outlines, drafts, shipped posts" },
-  { code: "movement", label: "Movement", metric: "walks, minutes, comfort notes" },
-  { code: "reading", label: "Reading", metric: "pages, notes, attention minutes" },
-  { code: "project", label: "Project Shipping", metric: "tickets, commits, user feedback" },
+  { code: "seo", label: "SEO/Growth", metric: "tools opened, keywords analyzed, backlink channels screened" },
+  { code: "keyword_research", label: "Keyword analysis", metric: "sites, seed terms, keyword rows, usable count" },
+  { code: "backlink_work", label: "Backlink work", metric: "channels screened, normal prospects, follow-ups" },
+  { code: "content_pipeline", label: "Content pipeline", metric: "page ideas, briefs, internal link ideas" },
 ] as const;
 
 const taskTemplates: Record<string, Omit<TaskPrescription, "goal_id">> = {
   seo: {
-    title: "SEO growth block",
-    meta: "Independent builder template",
-    standard_task: "Cluster 20 keywords around one search intent and draft the next brief.",
-    easy_task: "Review 5 keywords and mark intent, difficulty, and next action.",
-    minimum_task: "Write down one keyword opportunity and one question it should answer.",
+    title: "SEO work evidence block",
+    meta: "Count-only independent site owner template",
+    standard_task: "Open Semrush, Ahrefs, or Trends. Analyze 3 competitor sites, 3 seed terms, and at least 30 keyword rows. Log only counts and optional metadata.",
+    easy_task: "Open one SEO tool. Analyze 1 competitor site or 1 seed term, then log keyword rows analyzed and usable keyword count.",
+    minimum_task: "Keep-alive: open one SEO tool or screen one backlink channel, then log the work count only.",
     recommended_level: "easy",
-    reason: "Process assets make slow SEO progress visible before traffic changes.",
+    reason: "StayThread tracks work evidence without asking you to store private keywords or backlink URLs.",
   },
-  writing: {
-    title: "Writing shipment block",
-    meta: "Visible output template",
-    standard_task: "Draft 800 words or complete one full section.",
-    easy_task: "Write 200 rough words from existing notes.",
-    minimum_task: "Write 3 useful bullets without editing.",
+  keyword_research: {
+    title: "Keyword analysis block",
+    meta: "Semrush / Ahrefs / Trends workflow",
+    standard_task: "Analyze 5 competitor pages and 5 seed terms. Record total keyword rows reviewed, usable keyword count, and optional volume/result-count metadata.",
+    easy_task: "Analyze 2 seed terms and record how many keyword rows you reviewed.",
+    minimum_task: "Keep-alive: open one keyword tool and review one seed term.",
     recommended_level: "easy",
-    reason: "Writing improves when output volume is protected from perfection pressure.",
+    reason: "New and early-stage sites need repeated keyword analysis before content direction is clear.",
   },
-  movement: {
-    title: "Movement capacity block",
-    meta: "Energy support template",
-    standard_task: "Walk or train for 30 minutes at comfortable effort.",
-    easy_task: "Walk 15 minutes and record energy before and after.",
-    minimum_task: "Stand up, breathe, and walk for 5 minutes.",
+  backlink_work: {
+    title: "Backlink screening block",
+    meta: "Normal-site prospecting workflow",
+    standard_task: "Screen 10 potential sites. Count how many have an application channel, normal content, and low spam/outbound-link risk.",
+    easy_task: "Screen 3 sites or one backlink channel and record passable prospects count.",
+    minimum_task: "Keep-alive: screen one backlink channel or one site for application path and spam risk.",
     recommended_level: "minimum",
-    reason: "Movement should preserve recovery and never become punishment for missed days.",
+    reason: "Existing low-content or low-traffic sites need steady backlink work, but the platform should not store private URLs.",
   },
-  reading: {
-    title: "Reading base training",
-    meta: "Low-stimulation focus",
-    standard_task: "Read 30 minutes and capture 3 notes.",
-    easy_task: "Read 10 minutes and mark one useful passage.",
-    minimum_task: "Open the book and read 2 pages.",
+  content_pipeline: {
+    title: "Content pipeline block",
+    meta: "From keyword work to page assets",
+    standard_task: "Turn usable keyword counts into 3 page ideas and 1 brief outline in your private workspace. Log counts only.",
+    easy_task: "Create 1 page idea from yesterday's keyword analysis and log it.",
+    minimum_task: "Keep-alive: write one page idea ID or brief placeholder.",
     recommended_level: "easy",
-    reason: "Reading builds tolerance for slow feedback without raising pressure.",
-  },
-  project: {
-    title: "Project shipping block",
-    meta: "Execution template",
-    standard_task: "Ship one small user-visible improvement and write the release note.",
-    easy_task: "Finish one scoped implementation step or test.",
-    minimum_task: "Define the next 10-minute action and remove one blocker.",
-    recommended_level: "easy",
-    reason: "Shipping goals need visible increments instead of endless redesign.",
+    reason: "Content planning can stay private while StayThread tracks whether the process keeps moving.",
   },
 };
 
 export function tasksForGoal(goal?: GoalLike | null): TaskPrescription[] {
   const code = goal?.category_code && taskTemplates[goal.category_code] ? goal.category_code : "seo";
+  if (code === "seo") {
+    return [
+      { goal_id: goal?.id ?? null, ...taskTemplates.keyword_research },
+      { goal_id: goal?.id ?? null, ...taskTemplates.backlink_work },
+      {
+        goal_id: goal?.id ?? null,
+        title: "Daily SEO review",
+        meta: "Count-only recovery loop",
+        standard_task: "Summarize tools opened, rows analyzed, usable count, channels screened, and tomorrow's keep-alive action.",
+        easy_task: "Answer the 3 review prompts with counts only.",
+        minimum_task: "Keep-alive: choose tomorrow's smallest SEO action.",
+        recommended_level: "minimum",
+        reason: "Review keeps the next action visible without exposing your private keywords or URLs.",
+      },
+    ];
+  }
   return [
-    { goal_id: null, ...taskTemplates.reading },
+    { goal_id: goal?.id ?? null, ...taskTemplates.seo },
     { goal_id: goal?.id ?? null, ...taskTemplates[code] },
     {
       goal_id: null,
-      title: "Daily review",
+      title: "Daily SEO review",
       meta: "Recovery capacity",
-      standard_task: "Write a 6-line review with blocker and next action.",
+      standard_task: "Write a count-only review with blocker and next action.",
       easy_task: "Answer the 3 review prompts.",
-      minimum_task: "Mark state and choose tomorrow's minimum action.",
+      minimum_task: "Keep-alive: mark state and choose tomorrow's smallest action.",
       recommended_level: "minimum",
       reason: "Review keeps the next action visible and makes recovery easier.",
     },
@@ -227,7 +273,7 @@ export function generateReviewFeedback(input: {
   interruption: string;
   tomorrowMinimum: string;
 }) {
-  return `${input.movedForward || "One process asset moved forward."} The interruption is useful data, not a failure. Tomorrow, start with: ${input.tomorrowMinimum || "one minimum action."}`;
+  return `${input.movedForward || "One SEO work count moved forward."} The interruption is useful data, not a failure. Keep the actual keywords and URLs in your private workspace. Tomorrow, start with: ${input.tomorrowMinimum || "one keep-alive action."}`;
 }
 
 export function generateWeeklyReview(input: {
@@ -235,24 +281,27 @@ export function generateWeeklyReview(input: {
   totalCount: number;
   activeGoals: number;
   latestDailyFeedback?: string | null;
+  seoWorkEvidence?: Record<string, number>;
 }) {
   const completionRate = input.totalCount > 0 ? Math.round((input.completedCount / input.totalCount) * 100) : 0;
+  const seoWorkEvidence = input.seoWorkEvidence ?? {};
   const bottlenecks =
     completionRate >= 70
-      ? ["Task volume can rise slightly next week.", "Protect the review habit so progress data stays fresh."]
+      ? ["Task volume can rise slightly next week.", "Keep recording counts, not private keywords or backlink URLs."]
       : ["Continuity is still fragile.", "The next plan should lower friction before adding volume."];
 
   return {
-    summary: `This week logged ${input.completedCount} of ${input.totalCount} tasks across ${input.activeGoals} active goal threads. The best next move is to keep the line credible and only increase depth after consistency is visible.`,
+    summary: `This week logged ${input.completedCount} of ${input.totalCount} tasks across ${input.activeGoals} active SEO threads. StayThread is tracking work evidence, not your private keyword or backlink list. The best next move is to keep the line credible and only increase depth after consistency is visible.`,
     assetGrowth: {
       completed_tasks: input.completedCount,
       completion_rate: completionRate,
       active_goals: input.activeGoals,
+      ...seoWorkEvidence,
     },
     bottlenecks,
     nextWeekPlan: [
-      "Keep one main goal visible on the Today page.",
-      completionRate >= 70 ? "Move one task from easy to standard on high-energy days." : "Default to easy/minimum tasks for the first three days.",
+      "Keep one main SEO/Growth goal visible on the Today page.",
+      completionRate >= 70 ? "Move one task from easy to standard on high-energy days." : "Default to easy/keep-alive tasks for the first three days.",
       input.latestDailyFeedback ?? "Close each day with one sentence about what moved forward.",
     ],
   };

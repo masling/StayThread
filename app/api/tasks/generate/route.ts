@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       generation_type: "daily_task_prescription",
       input_summary: selectedGoal ? `${selectedGoal.category_code}: ${selectedGoal.title}` : "base training",
       output_summary: tasks.map((task) => task.title).join(", "),
-      guardrails: { deterministic_templates: true, recovery_tiers: true },
+      guardrails: { deterministic_templates: true, recovery_tiers: true, count_only_seo_tracking: true, no_ai_keyword_or_backlink_targets: true },
     });
     await logEvent(supabase, profile, "daily_tasks_generated", { goalId: selectedGoal?.id ?? null, count: tasks.length });
 

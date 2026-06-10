@@ -3,7 +3,7 @@ import { jsonError } from "@/app/api/_utils";
 import { currentWeekRange, ensureSeedGoals, logEvent } from "@/lib/data";
 import { resolveRequestProfile } from "@/lib/request-context";
 import { attachPrototypeSession } from "@/lib/session";
-import { generateWeeklyReview } from "@/lib/staythread-domain";
+import { generateWeeklyReview, sanitizeSeoWorkEvidence, seoWorkMetricKeys } from "@/lib/staythread-domain";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET(request: NextRequest) {
@@ -50,11 +50,28 @@ export async function POST(request: NextRequest) {
       .limit(1);
     if (reviewError) throw new Error(reviewError.message);
 
+    const { data: progressLogs, error: progressError } = await supabase
+      .from("progress_logs")
+      .select("value_data")
+      .eq("profile_id", profile.id)
+      .gte("log_date", weekStart)
+      .lte("log_date", weekEnd);
+    if (progressError) throw new Error(progressError.message);
+
+    const seoWorkEvidence = Object.fromEntries(seoWorkMetricKeys.map((key) => [key, 0])) as Record<(typeof seoWorkMetricKeys)[number], number>;
+    for (const log of progressLogs ?? []) {
+      const valueData = sanitizeSeoWorkEvidence((log.value_data ?? {}) as Record<string, unknown>);
+      for (const key of seoWorkMetricKeys) {
+        seoWorkEvidence[key] += valueData[key];
+      }
+    }
+
     const generated = generateWeeklyReview({
       completedCount: (tasks ?? []).filter((task) => task.status === "completed").length,
       totalCount: tasks?.length ?? 0,
       activeGoals: goals.length,
       latestDailyFeedback: reviews?.[0]?.coach_feedback ?? null,
+      seoWorkEvidence,
     });
 
     const { data, error } = await supabase

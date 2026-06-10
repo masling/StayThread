@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { assessmentQuestions, dimensions, type AssessmentResult } from "@/lib/staythread-domain";
+import { assessmentQuestions, dimensions, type AssessmentResult, type SeoWorkEvidence } from "@/lib/staythread-domain";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type Goal = {
@@ -65,6 +65,23 @@ type WeeklyReview = {
   week_end: string;
 };
 
+type SeoWorkInput = SeoWorkEvidence;
+
+function emptySeoWorkInput(): SeoWorkInput {
+  return {
+    tools_opened: 0,
+    competitor_sites_analyzed: 0,
+    seed_terms_analyzed: 0,
+    keywords_analyzed: 0,
+    usable_keywords_found: 0,
+    backlink_channels_screened: 0,
+    normal_site_prospects_counted: 0,
+    outreach_attempts_logged: 0,
+    followups_logged: 0,
+    privacy_mode: "count_only",
+  };
+}
+
 type AuthUser = {
   id: string;
   email: string | null;
@@ -96,36 +113,36 @@ type RouteId = (typeof routeIds)[number];
 
 const modules = [
   {
-    name: "Reading",
+    name: "Keyword analysis",
     depth: "D1-D3",
-    copy: "Rebuild tolerance for slow, low-stimulation attention.",
-    standard: "Read 30 minutes with 3 notes.",
-    easy: "Read 10 minutes.",
-    minimum: "Read 2 pages.",
+    copy: "Use Semrush, Ahrefs, or Trends without asking StayThread to store the actual terms.",
+    standard: "Analyze 3 competitor sites, 3 seed terms, and at least 30 keyword rows.",
+    easy: "Analyze 1 competitor site or 1 seed term.",
+    minimum: "Open one keyword tool and review one seed term.",
   },
   {
-    name: "Movement",
+    name: "Backlink screening",
     depth: "D1-D3",
-    copy: "Support energy without turning movement into punishment.",
-    standard: "Walk or train 30 minutes at comfortable effort.",
-    easy: "Walk 15 minutes.",
-    minimum: "Stand up and walk 5 minutes.",
+    copy: "Check whether backlink opportunities have normal content, a passable application path, and low spam risk.",
+    standard: "Screen 10 sites or channels and count passable prospects.",
+    easy: "Screen 3 sites or one channel.",
+    minimum: "Screen one site for application path and spam risk.",
   },
   {
-    name: "Writing",
+    name: "Content pipeline",
     depth: "D1-D4",
-    copy: "Convert consumption and thinking into visible output.",
-    standard: "Write 800 words or finish a section.",
-    easy: "Write 200 words.",
-    minimum: "Write 3 thoughts.",
+    copy: "Move usable keyword counts into private page ideas and brief placeholders.",
+    standard: "Create 3 page ideas and 1 brief in your private workspace.",
+    easy: "Create 1 page idea from keyword analysis.",
+    minimum: "Write one page idea ID or placeholder.",
   },
   {
     name: "Daily review",
     depth: "D1-D4",
-    copy: "Train recovery by closing the day with a tiny feedback loop.",
-    standard: "Answer all prompts and plan tomorrow.",
-    easy: "Answer the 3 prompts.",
-    minimum: "Choose tomorrow's minimum action.",
+    copy: "Close the day with workload counts, blocker, and the next keep-alive action.",
+    standard: "Summarize tools opened, rows analyzed, usable count, and channels screened.",
+    easy: "Answer the 3 review prompts with counts only.",
+    minimum: "Choose tomorrow's smallest SEO action.",
   },
 ];
 
@@ -137,7 +154,7 @@ const aiCapabilities = [
   },
   {
     title: "Adaptive task prescription",
-    copy: "Generates standard, easy, and minimum tasks from category templates, constraints, and recent completion history.",
+    copy: "Generates standard, easy, and keep-alive actions from deterministic templates, constraints, and recent completion history.",
     detail: "Template-governed generation",
   },
   {
@@ -147,7 +164,7 @@ const aiCapabilities = [
   },
 ];
 
-const integrations = ["Supabase Auth", "PostgreSQL", "Google Search Console", "GitHub", "Notion / Docs", "Chrome extension"];
+const integrations = ["Supabase Auth", "PostgreSQL", "Assessment engine", "Task templates", "Weekly reviews", "Export/delete controls"];
 
 const planCards = [
   {
@@ -159,8 +176,8 @@ const planCards = [
   {
     name: "Builder",
     price: "$12",
-    copy: "For individuals running multiple slow-feedback goals.",
-    features: ["Unlimited goal templates", "AI weekly review", "Process asset dashboard"],
+    copy: "For individuals who need a daily operating rhythm for one serious goal.",
+    features: ["Action evidence dashboard", "AI weekly review", "Recovery-aware tasks"],
   },
   {
     name: "Team",
@@ -206,6 +223,7 @@ export default function Home() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [activeGoal, setActiveGoal] = useState(0);
   const [taskMode, setTaskMode] = useState<0 | 1 | 2>(1);
+  const [seoWorkInput, setSeoWorkInput] = useState<SeoWorkInput>(emptySeoWorkInput);
   const [toast, setToast] = useState("");
   const [reviewFeedback, setReviewFeedback] = useState("Choose Generate review to create a short supportive summary.");
 
@@ -361,10 +379,17 @@ export default function Home() {
     try {
       await apiFetch("/api/tasks/log", {
         method: "POST",
-        body: JSON.stringify({ taskId: task.id, goalId: task.goal_id, level }),
+        body: JSON.stringify({
+          taskId: task.id,
+          goalId: task.goal_id,
+          level,
+          valueData: seoWorkInput,
+          notes: "Count-only SEO work evidence. Real keywords and backlink URLs stay private.",
+        }),
       });
       setTasks((current) => current.map((item) => (item.id === task.id ? { ...item, selected_level: level, status: "completed" } : item)));
-      setToast(`${level} task logged. The chain stays intact.`);
+      setSeoWorkInput(emptySeoWorkInput());
+      setToast(`${level === "minimum" ? "keep-alive" : level} task logged with count-only SEO evidence.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Task log failed");
     }
@@ -503,7 +528,7 @@ export default function Home() {
       setGoals(data.goals ?? []);
       setTasks(data.tasks ?? []);
       setWeeklyReview(data.weeklyReview);
-      setReviewFeedback("Progress was reset. Start again with a minimum action.");
+      setReviewFeedback("Progress was reset. Start again with a keep-alive SEO action.");
       setToast("Progress data reset.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Progress reset failed");
@@ -530,9 +555,10 @@ export default function Home() {
   const assetRows = useMemo(() => {
     const first = goals[0]?.process_assets ?? {};
     return [
-      [first.keywords ?? 12, "keywords mapped"],
-      [first.briefs ?? 2, "briefs drafted"],
-      [first.internal_links ?? 4, "internal links"],
+      [first.tools_opened ?? 5, "tools opened"],
+      [first.keywords_analyzed ?? 240, "keywords analyzed"],
+      [first.usable_keywords_found ?? 18, "usable keywords found"],
+      [first.backlink_channels_screened ?? 6, "backlink channels screened"],
       [tasks.filter((task) => task.status === "completed").length, "tasks logged"],
     ];
   }, [goals, tasks]);
@@ -627,6 +653,8 @@ export default function Home() {
           <Today
             tasks={tasks}
             assetRows={assetRows}
+            seoWorkInput={seoWorkInput}
+            setSeoWorkInput={setSeoWorkInput}
             taskMode={taskMode}
             setTaskMode={setTaskMode}
             onLogTask={logTask}
@@ -683,9 +711,9 @@ function Landing({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
       </header>
       <section className="landing-hero">
         <div className="hero-copy">
-          <span className="label">AI goal training for slow-feedback work</span>
-          <h1 id="landing-title">Stop restarting. Build a system that keeps going.</h1>
-          <p>StayThread diagnoses your execution pattern and gives you adaptive daily tasks: standard when you have energy, easy when life is busy, minimum when the only goal is not breaking the line.</p>
+          <span className="label">AI-assisted goal training</span>
+          <h1 id="landing-title">Stay with long-term goals when feedback is slow.</h1>
+          <p>StayThread diagnoses your execution pattern and gives you daily actions: standard when you have energy, easy when life is busy, keep-alive when the only goal is not breaking the line.</p>
           <div className="hero-actions">
             <button className="btn btn-primary" onClick={() => onNavigate("assessment")}>Get my action profile</button>
             <a className="btn btn-secondary" href="#product-loop">See how it works</a>
@@ -694,9 +722,9 @@ function Landing({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
         <aside className="hero-preview panel">
           <div className="preview-top"><span className="label">Today</span><span className="badge badge-green">Line intact · 6 days</span></div>
           <div className="preview-list">
-            <div className="preview-task"><div><strong>Reading base training</strong><span>10 minutes + 2 notes, adjusted for low energy.</span></div><em>Easy</em></div>
-            <div className="preview-task"><div><strong>SEO goal block</strong><span>Cluster 5 search terms around &quot;focus recovery&quot;.</span></div><em>Standard</em></div>
-            <div className="preview-task"><div><strong>Recovery rule</strong><span>If missed, restart with one 5-minute action tomorrow.</span></div><em>Protected</em></div>
+            <div className="preview-task"><div><strong>Focused block</strong><span>Do one clear action and record visible process evidence.</span></div><em>Standard</em></div>
+            <div className="preview-task"><div><strong>Low-friction version</strong><span>Reduce scope without breaking the daily line.</span></div><em>Easy</em></div>
+            <div className="preview-task"><div><strong>Recovery rule</strong><span>If missed, do the smallest valid action and return tomorrow.</span></div><em>Keep-alive</em></div>
           </div>
         </aside>
       </section>
@@ -725,9 +753,9 @@ function LandingInfo({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
         </div>
         <div className="problem-grid">
           {[
-            ["Slow feedback", "You doubt the direction too early.", "Process metrics make invisible progress visible: minutes read, keywords mapped, drafts shipped, workouts completed."],
+            ["Slow feedback", "You doubt the direction too early.", "Process evidence makes invisible progress visible before external results arrive."],
             ["High stimulus", "Your attention gets bought cheaply.", "The assessment identifies temptation patterns and starts with low-stimulation training, not motivational slogans."],
-            ["Start friction", "You know the task, but cannot begin.", "Every plan includes a minimum action so starting is measured in minutes, not perfect conditions."],
+            ["Start friction", "You know the task, but cannot begin.", "Every plan includes a keep-alive action so starting is measured in minutes, not perfect conditions."],
             ["Break collapse", "One missed day becomes the end.", "Recovery is designed into the system. A missed day triggers a lower tier, not shame."],
           ].map(([badge, title, copy]) => (
             <article className="problem-card" key={badge}><span className="badge">{badge}</span><h3>{title}</h3><p>{copy}</p></article>
@@ -737,7 +765,7 @@ function LandingInfo({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
       <section className="landing-section">
         <div className="landing-section-head">
           <div><span className="label">AI SaaS engine</span><h2>Structured AI, not a motivational chatbot.</h2></div>
-          <p>StayThread uses deterministic scoring and category templates first, then uses AI to explain, adapt, and summarize. That keeps the product testable and avoids vague advice.</p>
+          <p>StayThread uses deterministic scoring and structured templates first, then uses AI to explain, encourage, and summarize. The coach stays bounded by the chosen workflow.</p>
         </div>
         <div className="ai-grid">
           {aiCapabilities.map((capability) => (
@@ -756,33 +784,33 @@ function LandingInfo({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
         </div>
         <div className="loop-grid">
           {["Assess", "Prescribe", "Train", "Coach", "Adjust"].map((title, index) => (
-            <article className="loop-step" key={title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{["7 dimensions: clarity, start, continuity, resistance, recovery, energy, planning.", "Main training, support training, depth, and a realistic 7-day plan.", "Reading, movement, writing/logging, and daily review as base capacity.", "Goal templates for learning, writing, project work, movement, and SEO growth.", "Weekly AI review changes difficulty using completion, state, and process data."][index]}</p></article>
+            <article className="loop-step" key={title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{["7 dimensions: clarity, start, continuity, resistance, recovery, energy, planning.", "Stage, bottleneck, depth, and a realistic 7-day plan.", "Standard, easy, and keep-alive actions turn intent into daily practice.", "Daily logging keeps progress visible without turning the product into a generic to-do list.", "Weekly AI review changes difficulty using completion, state, and work evidence."][index]}</p></article>
           ))}
         </div>
       </section>
       <section className="landing-section">
         <div className="landing-section-head">
           <div><span className="label">Trust architecture</span><h2>Built like a serious SaaS, even in MVP.</h2></div>
-          <p>User-owned action data needs boring, reliable trust basics: scoped keys, RLS-ready tables, export/delete controls, and no clinical claims.</p>
+          <p>User-owned action data needs boring, reliable trust basics: scoped keys, RLS-ready tables, export/delete controls, and clear AI boundaries.</p>
         </div>
         <div className="trust-grid">
           <article><strong>RLS-ready Postgres</strong><span>Supabase tables include user ownership fields and Row Level Security for production auth.</span></article>
           <article><strong>Server-only secrets</strong><span>Service role access stays inside Next.js API routes, never in browser code.</span></article>
-          <article><strong>Safety guardrails</strong><span>Movement and coaching copy avoids diagnosis, punishment, and unsafe intensity jumps.</span></article>
+          <article><strong>Safety guardrails</strong><span>Coaching copy avoids diagnosis, punishment, and unsafe intensity jumps.</span></article>
           <article><strong>Data controls</strong><span>Settings include export/delete surfaces for profile and progress data.</span></article>
         </div>
       </section>
       <section className="landing-section" id="who">
         <div className="landing-section-head">
-          <div><span className="label">Who it helps</span><h2>For people with goals and unreliable execution.</h2></div>
-          <p>Students, employees, and early freelancers share the same pattern: ambition is real, but the operating system is fragile.</p>
+          <div><span className="label">Current beta focus</span><h2>Starting with solo international site owners.</h2></div>
+          <p>The product category stays broader than SEO. The current beta focuses on one slow-feedback workflow where daily execution is easy to lose: keyword analysis and backlink work.</p>
         </div>
         <div className="audience-grid">
           {[
-            ["Students", "Turn studying into daily evidence.", "Reading and course plans become smaller actions with recovery rules for exams, language learning, and deep skill work."],
-            ["Knowledge workers", "Protect personal goals after work.", "Use low-energy task tiers to keep writing, fitness, learning, and side projects alive during busy weeks."],
-            ["Freelancers", "Ship when nobody is managing you.", "Project and SEO templates turn vague growth goals into keyword research, content, outreach, and publishing blocks."],
-            ["Habit rebuilders", "Recover from broken plans faster.", "Minimum tasks and weekly review stop the common all-or-nothing loop after a missed day."],
+            ["New site owners", "Start with keyword discovery.", "Open Semrush, Ahrefs, or Trends and log how many sites, seed terms, and keyword rows you actually analyzed."],
+            ["Low-content sites", "Move from ideas to content evidence.", "Track usable keyword count and page ideas without storing the actual private keyword list."],
+            ["Low-traffic sites", "Add backlink work steadily.", "Screen channels and normal sites while avoiding spammy outbound-link farms."],
+            ["Solo SaaS sites", "Keep SEO moving without a team.", "Use keep-alive work when product, support, and SEO all compete for the same day."],
           ].map(([badge, title, copy]) => (
             <article key={badge}><span className="badge">{badge}</span><h3>{title}</h3><p>{copy}</p></article>
           ))}
@@ -791,7 +819,7 @@ function LandingInfo({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
       <section className="landing-section">
         <div className="landing-section-head">
           <div><span className="label">Connected workflow</span><h2>Designed to become the action layer across your tools.</h2></div>
-          <p>The MVP starts with manual logging. The product architecture leaves room for trustworthy integrations when users are ready to connect more data.</p>
+          <p>The MVP starts with manual logging and privacy-first process evidence. In the current site-owner beta, users keep real keywords and backlink URLs in their own tools while StayThread tracks work counts.</p>
         </div>
         <div className="integration-rail">
           {integrations.map((integration) => <span key={integration}>{integration}</span>)}
@@ -839,11 +867,11 @@ function LandingInfo({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
           <button type="button" onClick={() => onNavigate("settings")}>Data controls</button>
         </div>
         <div>
-          <h3>Use cases</h3>
-          <a href="#who">Students</a>
-          <a href="#who">Knowledge workers</a>
-          <a href="#who">Freelancers</a>
-          <a href="#product-loop">Habit recovery</a>
+          <h3>Current beta</h3>
+          <a href="#who">New site owners</a>
+          <a href="#who">Low-content sites</a>
+          <a href="#who">Low-traffic sites</a>
+          <a href="#who">Solo SaaS sites</a>
         </div>
       </footer>
     </>
@@ -904,7 +932,7 @@ function Onboarding({ profile, taskCategories, onSave, onNavigate }: {
         <div>
           <span className="label">Setup</span>
           <h1 id="onboarding-title">Configure the operating system before adding pressure.</h1>
-          <p>StayThread uses these inputs to size tasks and choose the first goal template. 特定字段保持 English，描述部分用中文也可以继续扩展。</p>
+          <p>StayThread uses these inputs to size SEO tasks and choose the first count-only workflow. Real keywords and backlink URLs can stay in your private tools.</p>
         </div>
         <span className="badge badge-blue">{profile?.onboarding_completed ? "Configured" : "New workspace"}</span>
       </div>
@@ -933,7 +961,7 @@ function Onboarding({ profile, taskCategories, onSave, onNavigate }: {
           <label>First module<select name="selectedModule" defaultValue={profile?.selected_module ?? "seo"}>{taskCategories.map((category) => <option key={category.code} value={category.code}>{category.label}</option>)}</select></label>
           <label>Coach tone<select name="tone" defaultValue={String(profile?.ai_preferences?.tone ?? "Calm")}><option>Calm</option><option>Direct</option><option>Analytical</option></select></label>
         </div>
-        <label>Primary goal context<textarea name="goalContext" defaultValue={profile?.goal_context ?? "Independent builder working on SEO and product publishing"} /></label>
+        <label>Primary goal context<textarea name="goalContext" defaultValue={profile?.goal_context ?? "Solo international site owner doing keyword analysis and SEO backlink work"} /></label>
         <label>Pressure mode<select name="pressureMode" defaultValue={String(profile?.ai_preferences?.pressureMode ?? "Recovery-first")}><option>Recovery-first</option><option>Balanced</option><option>Growth</option></select></label>
         <div className="controls">
           <button className="btn btn-primary" type="submit">Save and enter Today</button>
@@ -973,34 +1001,36 @@ function AssessmentResultView({ result, onNavigate, onRetake }: { result: Assess
   );
 }
 
-function Today({ tasks, assetRows, taskMode, setTaskMode, onLogTask, onGenerateTasks, onNavigate }: {
+function Today({ tasks, assetRows, seoWorkInput, setSeoWorkInput, taskMode, setTaskMode, onLogTask, onGenerateTasks, onNavigate }: {
   tasks: DailyTask[];
   assetRows: Array<Array<string | number>>;
+  seoWorkInput: SeoWorkInput;
+  setSeoWorkInput: (input: SeoWorkInput) => void;
   taskMode: 0 | 1 | 2;
   setTaskMode: (mode: 0 | 1 | 2) => void;
   onLogTask: (task: DailyTask, level: "standard" | "easy" | "minimum", mode: 0 | 1 | 2) => void;
   onGenerateTasks: () => void;
   onNavigate: (route: RouteId) => void;
 }) {
-  const states: Array<[string, string, 0 | 1 | 2]> = [["Ready", "standard tasks", 0], ["Busy", "easy tasks", 1], ["Tired", "minimum line", 2], ["Recovering", "restart only", 2]];
-  const levels: Array<["Standard" | "Easy" | "Minimum", "standard" | "easy" | "minimum", keyof DailyTask, 0 | 1 | 2]> = [
+  const states: Array<[string, string, 0 | 1 | 2]> = [["Ready", "standard tasks", 0], ["Busy", "easy tasks", 1], ["Tired", "keep-alive line", 2], ["Recovering", "restart only", 2]];
+  const levels: Array<["Standard" | "Easy" | "Keep-alive", "standard" | "easy" | "minimum", keyof DailyTask, 0 | 1 | 2]> = [
     ["Standard", "standard", "standard_task", 0],
     ["Easy", "easy", "easy_task", 1],
-    ["Minimum", "minimum", "minimum_task", 2],
+    ["Keep-alive", "minimum", "minimum_task", 2],
   ];
 
   return (
     <section className="view active" id="view-today" aria-labelledby="today-title">
       <div className="page-head">
-        <div><span className="label">Today</span><h1 id="today-title">Keep the chain from breaking.</h1><p>The day is successful when one meaningful line stays intact.</p></div>
+        <div><span className="label">Today</span><h1 id="today-title">Keep SEO work moving.</h1><p>The day is successful when one count-only SEO action gets logged.</p></div>
         <button className="btn btn-secondary" onClick={() => onNavigate("assessment")}>Retake assessment</button>
       </div>
       <div className="today-grid">
         <section className="panel ai-command">
           <div>
             <span className="label">AI command center</span>
-            <h2>Today&apos;s plan was lowered because recovery is the active bottleneck.</h2>
-            <p>StayThread is prioritizing continuity over volume. Finish any minimum task to keep the thread valid.</p>
+            <h2>Today&apos;s plan tracks work evidence, not private SEO outputs.</h2>
+            <p>Open Semrush, Ahrefs, Trends, or a backlink source. Log counts here; keep real keywords and URLs in your private workspace.</p>
           </div>
           <div className="ai-command-actions">
             <button className="btn btn-primary" onClick={onGenerateTasks}>Regenerate plan</button>
@@ -1009,11 +1039,12 @@ function Today({ tasks, assetRows, taskMode, setTaskMode, onLogTask, onGenerateT
           </div>
         </section>
         <section className="panel">
-          <div className="section-head"><div><span className="label">Daily state</span><h2>How much depth can today hold?</h2></div><span className="badge">{["Standard", "Easy", "Minimum"][taskMode]} recommended</span></div>
+          <div className="section-head"><div><span className="label">Daily state</span><h2>How much depth can today hold?</h2></div><span className="badge">{["Standard", "Easy", "Keep-alive"][taskMode]} recommended</span></div>
           <div className="state-grid">
             {states.map(([name, detail, mode]) => <button key={name} className={`state-card ${taskMode === mode ? "active" : ""}`} onClick={() => setTaskMode(mode)}><strong>{name}</strong><span>{detail}</span></button>)}
           </div>
         </section>
+        <SeoWorkEvidence input={seoWorkInput} onChange={setSeoWorkInput} />
         <section className="panel task-panel">
           <div className="section-head"><div><span className="label">Three-tier task set</span><h2>Choose the line that fits today.</h2></div><span className="badge badge-blue">Backend connected</span></div>
           <div className="task-stack">
@@ -1033,9 +1064,49 @@ function Today({ tasks, assetRows, taskMode, setTaskMode, onLogTask, onGenerateT
         </section>
         <aside className="right-rail">
           <section className="panel compact"><span className="label">Line status</span><div className="metric-row"><strong>6</strong><span>valid days this week</span></div><div className="week-line">{["M", "T", "W", "T", "F", "S", "S"].map((day, index) => <span className={`week-day ${index < 6 ? "done" : "today"}`} key={`${day}-${index}`}>{day}</span>)}</div></section>
-          <section className="panel compact coach-panel"><span className="label">AI coach</span><h3>Protect continuity before volume.</h3><p>A minimum task counts as a protected day. Do not compensate tomorrow; return with a realistic next action.</p><div className="coach-signal"><span>Confidence</span><strong>High</strong></div><div className="coach-signal"><span>Next adjustment</span><strong>D1 → D2 after 5 valid days</strong></div></section>
-          <section className="panel compact"><span className="label">Process assets</span><div className="asset-grid">{assetRows.map(([value, label]) => <div className="asset" key={label}><strong>{value}</strong><span>{label}</span></div>)}</div></section>
+          <section className="panel compact coach-panel"><span className="label">AI coach</span><h3>Encourage the work, never invent targets.</h3><p>AI reviews your counts and keeps the next action small. It does not output keywords, domains, backlink URLs, or outreach recipients.</p><div className="coach-signal"><span>Privacy</span><strong>Count-only</strong></div><div className="coach-signal"><span>Next adjustment</span><strong>D1 → D2 after 5 valid days</strong></div></section>
+          <section className="panel compact"><span className="label">Work evidence</span><div className="asset-grid">{assetRows.map(([value, label]) => <div className="asset" key={label}><strong>{value}</strong><span>{label}</span></div>)}</div></section>
         </aside>
+      </div>
+    </section>
+  );
+}
+
+function SeoWorkEvidence({ input, onChange }: { input: SeoWorkInput; onChange: (input: SeoWorkInput) => void }) {
+  const fields: Array<[keyof Omit<SeoWorkInput, "privacy_mode">, string, string]> = [
+    ["tools_opened", "Tools opened", "Semrush / Ahrefs / Trends"],
+    ["competitor_sites_analyzed", "Sites analyzed", "Competitors or SERP pages"],
+    ["seed_terms_analyzed", "Seed terms", "Root topics checked"],
+    ["keywords_analyzed", "Keyword rows", "Rows reviewed externally"],
+    ["usable_keywords_found", "Usable count", "Count only, no real terms"],
+    ["backlink_channels_screened", "Backlink channels", "Application/source paths"],
+    ["normal_site_prospects_counted", "Normal prospects", "Non-spam content sites"],
+    ["outreach_attempts_logged", "Outreach attempts", "Manual count"],
+    ["followups_logged", "Follow-ups", "Manual count"],
+  ];
+
+  function updateField(key: keyof Omit<SeoWorkInput, "privacy_mode">, value: string) {
+    onChange({ ...input, [key]: Math.max(0, Number(value) || 0) });
+  }
+
+  return (
+    <section className="panel settings-card seo-evidence-panel">
+      <div className="section-head">
+        <div>
+          <span className="label">SEO work evidence</span>
+          <h2>Log counts, not private outputs.</h2>
+          <p>Real keywords and backlink URLs stay in your own tools. StayThread only records workload evidence for continuity.</p>
+        </div>
+        <span className="badge badge-green">count-only</span>
+      </div>
+      <div className="settings-grid compact-grid">
+        {fields.map(([key, label, hint]) => (
+          <label key={key}>
+            {label}
+            <input type="number" min="0" value={input[key]} onChange={(event) => updateField(key, event.target.value)} />
+            <span className="field-hint">{hint}</span>
+          </label>
+        ))}
       </div>
     </section>
   );
@@ -1052,16 +1123,16 @@ function Goals({ goals, taskCategories, activeGoal, setActiveGoal, selectedGoal,
 }) {
   return (
     <section className="view active" id="view-goals" aria-labelledby="goals-title">
-      <div className="page-head"><div><span className="label">Category companion</span><h1 id="goals-title">Long-term goals become process assets.</h1><p>Templates keep tasks professional and realistic instead of generic.</p></div><button className="btn btn-primary" onClick={() => onGenerateTasks(selectedGoal?.id)}>Generate Today tasks</button></div>
+      <div className="page-head"><div><span className="label">SEO/Growth companion</span><h1 id="goals-title">Site growth becomes countable work evidence.</h1><p>Templates guide keyword analysis and backlink screening without asking for private keywords or URLs.</p></div><button className="btn btn-primary" onClick={() => onGenerateTasks(selectedGoal?.id)}>Generate Today tasks</button></div>
       <div className="goal-layout">
         <section className="goal-list">{goals.map((goal, index) => <button className={`goal-item ${index === activeGoal ? "active" : ""}`} key={goal.id} onClick={() => setActiveGoal(index)}><span className="badge">{goal.category_code}</span><h3 style={{ margin: "12px 0 8px" }}>{goal.title}</h3><p>{goal.description}</p><div className="progress" style={{ marginTop: 14 }}><span style={{ width: `${goal.progress}%` }} /></div></button>)}</section>
         <section className="panel goal-detail">{selectedGoal ? <><span className="badge badge-blue">{selectedGoal.category_code} template</span><h2>{selectedGoal.title}</h2><p>{selectedGoal.description}</p><div className="score-grid" style={{ marginTop: 18 }}>{Object.entries(selectedGoal.process_assets ?? {}).slice(0, 2).map(([label, value]) => <div className="asset" key={label}><strong>{value}</strong><span>{label}</span></div>)}</div><button className="btn btn-secondary" onClick={() => onGenerateTasks(selectedGoal.id)}>Use this template today</button></> : <p>No goals yet.</p>}</section>
         <form className="panel settings-card goal-create" onSubmit={onCreateGoal}>
           <span className="label">Create goal</span>
-          <h2>Start with a category so AI has constraints.</h2>
-          <label>Goal title<input name="title" required placeholder="Publish a search-led resource hub" /></label>
+          <h2>Start with an SEO workflow so tasks stay concrete.</h2>
+          <label>Goal title<input name="title" required placeholder="Grow an English niche site" /></label>
           <label>Category<select name="categoryCode" defaultValue="seo">{taskCategories.map((category) => <option key={category.code} value={category.code}>{category.label}</option>)}</select></label>
-          <label>Description<textarea name="description" placeholder="What is the slow-feedback outcome and why does it matter?" /></label>
+          <label>Description<textarea name="description" placeholder="Site stage, SEO bottleneck, tools used, and daily available time." /></label>
           <button className="btn btn-primary" type="submit">Create goal</button>
         </form>
       </div>
@@ -1070,11 +1141,35 @@ function Goals({ goals, taskCategories, activeGoal, setActiveGoal, selectedGoal,
 }
 
 function Training() {
-  return <section className="view active" id="view-training"><div className="page-head"><div><span className="label">Foundational training</span><h1>Build the ability to stay with slow feedback.</h1><p>Reading, movement, writing, and daily review train the base capacity behind long-term action.</p></div></div><div className="module-grid">{modules.map((module) => <article className="module-card" key={module.name}><span className="badge badge-blue">{module.depth}</span><h2>{module.name}</h2><p>{module.copy}</p><div className="milestone-list"><div className="milestone"><strong>Standard</strong><span>{module.standard}</span></div><div className="milestone"><strong>Easy</strong><span>{module.easy}</span></div><div className="milestone"><strong>Minimum</strong><span>{module.minimum}</span></div></div></article>)}</div></section>;
+  return (
+    <section className="view active" id="view-training">
+      <div className="page-head">
+        <div>
+          <span className="label">SEO/Growth workflows</span>
+          <h1>Keep site growth moving while external feedback is slow.</h1>
+          <p>Keyword analysis, backlink screening, content pipeline, and daily review are sized into standard, easy, and keep-alive actions.</p>
+        </div>
+      </div>
+      <div className="module-grid">
+        {modules.map((module) => (
+          <article className="module-card" key={module.name}>
+            <span className="badge badge-blue">{module.depth}</span>
+            <h2>{module.name}</h2>
+            <p>{module.copy}</p>
+            <div className="milestone-list">
+              <div className="milestone"><strong>Standard</strong><span>{module.standard}</span></div>
+              <div className="milestone"><strong>Easy</strong><span>{module.easy}</span></div>
+              <div className="milestone"><strong>Keep-alive</strong><span>{module.minimum}</span></div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function Review({ feedback, onSubmit }: { feedback: string; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
-  return <section className="view active" id="view-review"><div className="page-head"><div><span className="label">Daily review</span><h1>Close the day without overthinking it.</h1><p>Two minutes is enough. Capture what moved, what interrupted, and tomorrow&apos;s minimum action.</p></div></div><form className="panel review-form" onSubmit={onSubmit}><label>What moved forward today?<textarea name="movedForward" defaultValue="Read 10 minutes and mapped one keyword cluster." /></label><label>What interrupted or reduced progress?<textarea name="interruption" defaultValue="Energy dipped after lunch, so I chose the easy tier." /></label><label>What is tomorrow&apos;s minimum action?<textarea name="tomorrowMinimum" defaultValue="Open the keyword sheet and mark one next term." /></label><button className="btn btn-primary">Generate review</button></form><section className="panel compact review-output"><span className="label">Coach feedback</span><p>{feedback}</p></section></section>;
+  return <section className="view active" id="view-review"><div className="page-head"><div><span className="label">Daily review</span><h1>Close the day without exposing private SEO outputs.</h1><p>Two minutes is enough. Capture work counts, interruption, and tomorrow&apos;s keep-alive action.</p></div></div><form className="panel review-form" onSubmit={onSubmit}><label>What moved forward today?<textarea name="movedForward" defaultValue="Opened Ahrefs, analyzed 2 competitor sites, reviewed 40 keyword rows, and found 4 usable candidates without storing the terms." /></label><label>What interrupted or reduced progress?<textarea name="interruption" defaultValue="Avoided outreach because backlink replies take too long." /></label><label>What is tomorrow&apos;s keep-alive action?<textarea name="tomorrowMinimum" defaultValue="Screen one backlink channel and log whether it has a normal application path." /></label><button className="btn btn-primary">Generate review</button></form><section className="panel compact review-output"><span className="label">Coach feedback</span><p>{feedback}</p></section></section>;
 }
 
 function Insights({ weeklyReview, onGenerate }: { weeklyReview: WeeklyReview | null; onGenerate: () => void }) {
@@ -1082,14 +1177,14 @@ function Insights({ weeklyReview, onGenerate }: { weeklyReview: WeeklyReview | n
   return (
     <section className="view active" id="view-insights">
       <div className="page-head">
-        <div><span className="label">Weekly AI review</span><h1>Turn activity into the next operating decision.</h1><p>Weekly review summarizes process assets, bottlenecks, and the next plan from real task and review data.</p></div>
+        <div><span className="label">Weekly AI review</span><h1>Turn SEO work counts into the next operating decision.</h1><p>Weekly review summarizes count-only work evidence, bottlenecks, and the next plan from task and review data.</p></div>
         <button className="btn btn-primary" onClick={onGenerate}>Generate weekly review</button>
       </div>
       <div className="insight-grid">
         <section className="panel insight-summary">
           <span className="badge badge-blue">{weeklyReview ? `${weeklyReview.week_start} to ${weeklyReview.week_end}` : "Not generated"}</span>
           <h2>{weeklyReview ? "Current week summary" : "Generate the first weekly review"}</h2>
-          <p>{weeklyReview?.summary ?? "StayThread will read task completion, daily reviews, and active goals, then produce a constrained plan for next week."}</p>
+          <p>{weeklyReview?.summary ?? "StayThread will read task completion, daily reviews, and count-only SEO work evidence, then produce a constrained plan for next week."}</p>
         </section>
         <section className="panel compact">
           <span className="label">Asset growth</span>
@@ -1162,5 +1257,5 @@ function Settings({ profile, authUser, onSave, onLogout, onExportData, onResetPr
   onResetProgress: () => void;
   onDeleteAccount: () => void;
 }) {
-  return <section className="view active" id="view-settings"><div className="page-head"><div><span className="label">Trust and control</span><h1>Profile data stays editable.</h1><p>StayThread should collect only what affects the selected goal or training module.</p></div></div><div className="settings-grid"><form className="panel settings-card" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); onSave({ dailyAvailableMinutes: Number(form.get("dailyAvailableMinutes") ?? 35), preferredTime: String(form.get("preferredTime") ?? "Afternoon"), goalContext: String(form.get("goalContext") ?? ""), onboardingCompleted: true }); }}><h2>Profile</h2><label>Daily available minutes<input name="dailyAvailableMinutes" type="number" defaultValue={profile?.daily_available_minutes ?? 35} /></label><label>Preferred time<select name="preferredTime" defaultValue={profile?.preferred_time ?? "Afternoon"}><option>Morning</option><option>Afternoon</option><option>Evening</option></select></label><label>Primary goal context<input name="goalContext" defaultValue={profile?.goal_context ?? "Independent builder working on SEO and product publishing"} /></label><button className="btn btn-primary" type="submit">Save profile</button></form><section className="panel settings-card"><h2>Account</h2><p>{authUser ? `Signed in as ${authUser.email ?? authUser.id} with ${authUser.provider ?? "email"}. Your workspace is linked to Supabase Auth.` : "You are using prototype preview mode. Create an account to bind this workspace to Supabase Auth."}</p>{authUser ? <button className="btn btn-secondary" onClick={onLogout}>Sign out</button> : null}</section><section className="panel settings-card"><h2>Privacy controls</h2><p>Export is a full JSON snapshot. Reset removes progress and reviews while keeping profile and goals. Delete account removes the prototype profile and cascaded data.</p><button className="btn btn-secondary" onClick={onExportData}>Export profile data</button><button className="btn btn-secondary" onClick={onResetProgress}>Reset progress data</button><button className="btn btn-danger" onClick={onDeleteAccount}>Delete account</button></section></div></section>;
+  return <section className="view active" id="view-settings"><div className="page-head"><div><span className="label">Trust and control</span><h1>Profile data stays editable.</h1><p>StayThread records SEO workload evidence, not your private keyword list or backlink URL list.</p></div></div><div className="settings-grid"><form className="panel settings-card" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); onSave({ dailyAvailableMinutes: Number(form.get("dailyAvailableMinutes") ?? 35), preferredTime: String(form.get("preferredTime") ?? "Afternoon"), goalContext: String(form.get("goalContext") ?? ""), onboardingCompleted: true }); }}><h2>Profile</h2><label>Daily available minutes<input name="dailyAvailableMinutes" type="number" defaultValue={profile?.daily_available_minutes ?? 35} /></label><label>Preferred time<select name="preferredTime" defaultValue={profile?.preferred_time ?? "Afternoon"}><option>Morning</option><option>Afternoon</option><option>Evening</option></select></label><label>Primary goal context<input name="goalContext" defaultValue={profile?.goal_context ?? "Solo international site owner doing keyword analysis and SEO backlink work"} /></label><button className="btn btn-primary" type="submit">Save profile</button></form><section className="panel settings-card"><h2>Account</h2><p>{authUser ? `Signed in as ${authUser.email ?? authUser.id} with ${authUser.provider ?? "email"}. Your workspace is linked to Supabase Auth.` : "You are using prototype preview mode. Create an account to bind this workspace to Supabase Auth."}</p>{authUser ? <button className="btn btn-secondary" onClick={onLogout}>Sign out</button> : null}</section><section className="panel settings-card"><h2>Privacy controls</h2><p>Export is a full JSON snapshot. Reset removes progress and reviews while keeping profile and goals. Delete account removes the prototype profile and cascaded data. Real keywords and backlink URLs are not required for the beta loop.</p><button className="btn btn-secondary" onClick={onExportData}>Export profile data</button><button className="btn btn-secondary" onClick={onResetProgress}>Reset progress data</button><button className="btn btn-danger" onClick={onDeleteAccount}>Delete account</button></section></div></section>;
 }

@@ -3,6 +3,7 @@ import { ensureSeedGoals } from "@/lib/data";
 import { resolveRequestProfile } from "@/lib/request-context";
 import { attachPrototypeSession } from "@/lib/session";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { defaultProcessAssetsForCategory } from "@/lib/staythread-domain";
 import { jsonError } from "@/app/api/_utils";
 
 export async function GET(request: NextRequest) {
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
         title: body.title,
         description: body.description ?? "",
         progress: 0,
-        process_assets: {},
+        process_assets: defaultProcessAssetsForCategory(body.categoryCode),
       })
       .select("*")
       .single();

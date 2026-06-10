@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
       interruption?: string;
       tomorrowMinimum?: string;
     };
-    const movedForward = body.movedForward?.trim() || "One process asset moved forward.";
+    const movedForward = body.movedForward?.trim() || "One SEO work count moved forward.";
     const interruption = body.interruption?.trim() || "No major interruption recorded.";
-    const tomorrowMinimum = body.tomorrowMinimum?.trim() || "Choose one minimum action.";
+    const tomorrowMinimum = body.tomorrowMinimum?.trim() || "Choose one keep-alive SEO action.";
     const coachFeedback = generateReviewFeedback({ movedForward, interruption, tomorrowMinimum });
 
     const supabase = getSupabaseAdmin();
