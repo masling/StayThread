@@ -1,152 +1,203 @@
-# StayThread 工程规格
+# StayThread Engineering Spec
 
-## 推荐 Production Stack
+## Production Direction
 
-- App：Next.js App Router + TypeScript。
-- Styling：Tailwind CSS，并保留从静态界面原型提取的 token layer。
-- Auth / database：Supabase Auth + PostgreSQL。
-- AI：server-side structured calls，用于 interpretation、task phrasing、daily review、weekly review。
-- Analytics：先用 PostgreSQL event table，beta 后再决定是否接入专门 analytics tool。
+- App: Next.js App Router + TypeScript.
+- Styling: extracted token layer from `staythread-mvp/styles.css`, imported through `app/globals.css`.
+- Auth/database: Supabase Auth + PostgreSQL.
+- AI: server-side structured calls later; current MVP uses deterministic templates and review helpers.
+- Analytics: PostgreSQL `events` table first; dedicated analytics can be evaluated after beta.
 
-当前 `staythread-mvp/` 是 dependency-free static prototype，用来验证 flow、copy、scoring、registration timing 和 UI direction。它不是最终生产架构。
+The active application is `app/`. The `staythread-mvp/` folder remains a legacy static reference for flow, UI direction, and copy comparison.
 
-## 未登录到注册流程
+## Product Boundary
 
-默认入口必须是 public Landing，而不是登录后的 Today dashboard。
+StayThread's main product category is broader than SEO: long-term action training for slow-feedback goals.
 
-推荐顺序：
+The current beta wedge is narrower:
 
-1. Landing 展示产品价值和 `Start free assessment`。
-2. Assessment 允许未登录用户完整测试。
-3. Result 展示 stage、depth、bottlenecks 和 7-day plan。
-4. Result 页提示 `Create account to save`。
-5. Auth / Register 完成后进入 Today。
-6. 用户仍可使用 `Preview Today page` 预览登录后体验，方便 demo 和测试。
+- Beginner/intermediate solo international site owners.
+- Keyword analysis/discovery work using Semrush, Ahrefs, Google Trends, competitor pages, seed terms, and keyword rows.
+- SEO backlink work through manual channel screening, normal-site prospecting, and outreach/follow-up counts.
+- Count-only privacy: users are not expected to store real keywords, backlink URLs, domains, or outreach recipients in StayThread.
 
-这样可以避免用户在理解价值前被账号系统打断。
+## Implemented User Flow
+
+1. Public Landing explains the broad StayThread value.
+2. Public Assessment allows users to answer 30 questions before signup.
+3. Result shows stage, depth, primary/secondary bottlenecks, and starting prescription.
+4. Auth/register/login can bind the prototype workspace to Supabase Auth.
+5. Today shows current beta SEO/Growth tasks and count-only work evidence inputs.
+6. Goals exposes SEO/Growth templates and process assets.
+7. Training shows current workflow modules: keyword analysis, backlink screening, content pipeline, and daily review.
+8. Review stores daily reflection and deterministic coach feedback.
+9. Weekly review aggregates completion and SEO work evidence.
+10. Settings supports profile edit, export, progress reset, sign out, and account delete.
 
 ## Domain Model
 
-核心实体：
+Implemented tables used by the app:
 
-- `user_profiles`：基础背景和可编辑 preferences。
-- `assessment_results`：七个 dimension scores、stage、depth、summary。
-- `training_modules`：Reading、Movement、Writing、Daily Review。
-- `user_training_plans`：用户选择的 module、depth、three-tier tasks。
-- `task_categories`：goal templates 和 required profile fields。
-- `goals`：用户的 long-term goals。
-- `goal_profiles`：category-specific constraints、baseline、preferences。
-- `daily_states`：energy、mood、sleep、body、available minutes、distraction urge。
-- `daily_tasks`：standard、easy、minimum task set。
-- `progress_logs`：completion level、quantitative assets、notes。
-- `daily_reviews`：三个 reflection answers 和 coach feedback。
-- `weekly_reviews`：asset summary、bottlenecks、next-week plan。
+- `user_profiles`: prototype/auth ownership, preferences, available minutes, selected module.
+- `assessment_results`: dimension scores, stage, depth, bottlenecks, summary.
+- `task_categories`: category template metadata. The app ensures current SEO/Growth categories exist before seed goals.
+- `goals`: category-based goals and process assets.
+- `daily_tasks`: standard/easy/minimum task set; user-facing copy says keep-alive.
+- `progress_logs`: completion level, count-only work evidence, notes.
+- `daily_reviews`: daily moved-forward/interruption/tomorrow keep-alive review.
+- `weekly_reviews`: completion summary, work evidence aggregation, bottlenecks, next plan.
+- `subscriptions`: trial state and feature flags.
+- `events`: product analytics events.
+- `ai_generation_logs`: deterministic generation audit trail and guardrails.
+
+Planned or PRD-level entities not yet implemented as separate tables:
+
+- `training_modules`.
+- `user_training_plans`.
+- `goal_profiles`.
+- `seo_work_logs` as a dedicated table. Current implementation stores count-only evidence in `progress_logs.value_data`.
 
 ## Assessment Logic
 
-Dimensions：
+Dimensions:
 
-- Goal clarity。
-- Startup ability。
-- Consistency。
-- Anti-distraction。
-- Recovery ability。
-- Foundational energy。
-- Planning ability。
+- Goal clarity.
+- Startup ability.
+- Consistency.
+- Anti-distraction.
+- Recovery ability.
+- Foundational energy.
+- Planning ability.
 
-MVP scoring：
+MVP scoring:
 
-- 使用 1-5 Likert answers。
-- 每个 dimension 归一化为 0-100。
-- overall score 是所有 dimension scores 的平均值。
-- bottlenecks 是最低的两个 dimensions。
-- recommended depth 主要由最低 dimension 决定。
+- 1-5 Likert answers.
+- Each dimension normalizes to 0-100.
+- Overall score is the average dimension score.
+- Bottlenecks are the lowest two dimensions.
+- Recommended depth is primarily determined by the lowest dimension.
 
-Depth mapping：
+Depth mapping:
 
-- 0-39：D1 Recovery。
-- 40-59：D2 Stability。
-- 60-79：D3 Growth。
-- 80-100：D4 Challenge。
+- 0-39: D1 Recovery.
+- 40-59: D2 Stability.
+- 60-79: D3 Growth.
+- 80-100: D4 Challenge.
 
-Stage mapping：
+Stage mapping:
 
-- L1 Overloaded：goal clarity 或 foundational energy 很低，或 overall 低于 45。
-- L2 Starter：startup ability 低，或 overall 低于 60。
-- L3 Chain Builder：能行动，但 consistency / recovery 低于 70。
-- L4 Stable Builder：overall 70-84，且没有严重 bottleneck。
-- L5 Compounder：overall 85+，且没有 dimension 低于 70。
+- L1 Overloaded: goal clarity or foundational energy is very low, or overall is under 45.
+- L2 Starter: startup ability is low, or overall is under 60.
+- L3 Chain Builder: action is possible, but consistency or recovery is under 70.
+- L4 Stable Builder: overall 70-84 with no severe bottleneck.
+- L5 Compounder: overall 85+ and no dimension under 70.
 
-## Prescription Rules
+## Task and Evidence Rules
 
-- Goal clarity bottleneck：先收窄到 one primary goal，再生成重执行计划。
-- Startup ability bottleneck：优先 five-minute starts 和 minimum tasks。
-- Consistency bottleneck：优先 seven-day chain protection。
-- Anti-distraction bottleneck：加入 low-stimulation training 和 distraction notes。
-- Recovery ability bottleneck：missed day 后快速 downgrade，避免 streak-loss language。
-- Foundational energy bottleneck：降低 cognitive 和 physical load。
-- Planning ability bottleneck：使用 category templates 和 concrete process metrics。
+- Every task has `standard_task`, `easy_task`, and `minimum_task`.
+- The UI labels `minimum_task` as keep-alive.
+- `SEO/Growth` is the current beta P0 template.
+- Keyword work tracks counts only: tools opened, competitor/site count, seed terms, keyword rows, usable keyword count.
+- Backlink work tracks counts only: backlink channels screened, normal-site prospects, outreach attempts, follow-ups.
+- `sanitizeSeoWorkEvidence` whitelists numeric fields and forces `privacy_mode: "count_only"`.
+- Real keywords, backlink URLs, domains, and outreach recipients should stay in the user's private tools.
 
-Adaptive adjustment：
+## API Surface
 
-- Standard completion >= 70% over 7 days：轻微提高 challenge。
-- Easy completion >= 70%：保持当前 depth。
-- Minimum completion >= 70%，但 standard completion 低：保持 D1/D2。
-- Two consecutive missed days：自动 downgrade depth。
-- Four missed days in seven days：触发 reset 或 reassessment。
-- Low energy for three days：减少 task load。
+Implemented routes:
 
-## API Shape
+- `GET /api/bootstrap`: profile/session bootstrap, seed goals, today tasks, subscription, categories, latest assessment, recent reviews, weekly review.
+- `POST /api/assessment/submit`: score 30 answers, store assessment, ensure seed goals/tasks.
+- `POST /api/auth/register`: create Supabase Auth user and bind profile.
+- `POST /api/auth/login`: verify password login and restore profile.
+- `POST /api/auth/session`: bridge OAuth Supabase session into app session.
+- `POST /api/auth/logout`: clear auth session.
+- `GET /api/auth/me`: load current signed auth user.
+- `GET /api/categories`: return deterministic category templates.
+- `GET /api/goals`: ensure/load seed goals.
+- `POST /api/goals`: create category goal with default process assets.
+- `GET/PATCH /api/profile`: load/update profile.
+- `GET/PATCH /api/billing`: load/update trial and plan state.
+- `POST /api/tasks/generate`: regenerate today's deterministic task prescription.
+- `POST /api/tasks/log`: complete task and insert sanitized progress log.
+- `POST /api/reviews/daily`: store daily review and deterministic feedback.
+- `GET /api/reviews/weekly`: load current weekly review.
+- `POST /api/reviews/weekly`: aggregate tasks, reviews, and SEO work evidence.
+- `GET /api/data/export`: export profile-owned data.
+- `DELETE /api/data/progress`: reset progress/reviews/tasks while preserving profile and goals.
+- `DELETE /api/account`: delete prototype profile and cascade data.
+- `POST /api/events`: store product event.
 
-- `POST /api/assessment/start`
-- `POST /api/assessment/submit`
-- `POST /api/prescriptions/generate`
-- `GET /api/categories`
-- `POST /api/goals`
-- `GET /api/goals`
-- `POST /api/tasks/generate`
-- `POST /api/tasks/log`
-- `POST /api/reviews/daily`
-- `GET /api/reviews/daily`
-- `POST /api/reviews/weekly`
-- `GET /api/reviews/weekly`
-- `GET /api/settings/profile`
-- `PATCH /api/settings/profile`
-- `POST /api/settings/export`
-- `DELETE /api/settings/account`
+Not implemented:
+
+- `POST /api/assessment/start`.
+- `POST /api/prescriptions/generate`.
+- `GET /api/reviews/daily`.
+- Separate `/api/settings/*` namespace; current implementation uses `/api/profile`, `/api/data/*`, and `/api/account`.
 
 ## AI Guardrails
 
-- AI output 必须 concise、concrete、action-oriented。
-- AI 必须包含 task level、task description、metric、reason。
-- AI 不能诊断、治疗或做 medical claims。
-- AI 不能使用 shame-based language。
-- AI 不能鼓励 extreme exercise、sleep deprivation 或补偿式惩罚。
-- Movement suggestions 遇到 pain、injury、restrictions 时必须 downgrade intensity。
-- Structured templates 生成 task skeleton；AI 只优化 wording 和 explanation。
+Current implementation is deterministic and logs guardrails in `ai_generation_logs`.
+
+Future AI calls must follow:
+
+- Concise, concrete, action-oriented output.
+- Use structured templates for task skeletons.
+- AI may explain, encourage, rephrase, and summarize.
+- AI must not diagnose, treat, or make medical claims.
+- AI must not use shame-based language.
+- AI must not encourage extreme exercise, sleep deprivation, or punishment.
+- For site-owner beta, AI must not output keywords, keyword clusters, domains, backlink URLs, outreach targets, or email recipients.
+- AI must not promise ranking, traffic, income, or backlink success.
+
+## Verification Strategy
+
+Required before each functional commit:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+Minimal E2E smoke test:
+
+```bash
+npm run start -- -p 3010
+STAYTHREAD_BASE_URL=http://localhost:3010 npm run test:e2e
+```
+
+The smoke test covers the core beta loop:
+
+- Landing reachable.
+- Bootstrap creates session.
+- Assessment submit succeeds.
+- Task generation succeeds.
+- Count-only SEO task logging succeeds and private fields are not persisted.
+- Daily review succeeds.
+- Weekly review succeeds and aggregates SEO evidence.
+
+Browser smoke tests should still be used after significant visual changes.
 
 ## Release Milestones
 
-M1 Product skeleton：
+Completed:
 
-- Public Landing、Auth/Register、App shell、navigation、style tokens、database schema。
+- M1 Product skeleton: Landing, app shell, navigation, Supabase-backed API routes, logo/favicon.
+- M2 Assessment: 30-question questionnaire, scoring, result, registration prompt.
+- M4 Goal companion baseline: seed goals, category templates, task generation, progress logging.
+- M5 Reviews baseline: daily review and weekly review deterministic summaries.
+- Privacy baseline: count-only SEO work evidence and data export/reset/delete surfaces.
 
-M2 Assessment：
+Partially complete:
 
-- Questionnaire、scoring、result page、registration prompt、prescription rules。
+- M3 Training modules: current UI reflects SEO/Growth beta workflows; broader foundational modules remain PRD-level, not current beta validation target.
+- M6 Beta readiness: beta plan exists; analytics/events exist; cohort dashboard and systematic research logging still need operating discipline.
 
-M3 Training modules：
+Not complete:
 
-- Reading、Movement、Writing、Daily Review setup 和 daily tasks。
-
-M4 Goal companion：
-
-- Goal creation、category templates、task generation、progress logging。
-
-M5 Reviews：
-
-- Daily review、weekly review、controlled AI summaries。
-
-M6 Beta readiness：
-
-- Analytics、privacy checks、QA、onboarding copy、seed templates。
+- Controlled server-side AI generation.
+- SEO tutorial membership content.
+- GSC/Ahrefs/Semrush integrations.
+- Payment/checkout production flow.
+- Cohort analytics dashboard.
+- Full browser E2E suite.

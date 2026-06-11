@@ -1,5 +1,7 @@
 # StayThread Private Beta 测试计划
 
+配套执行记录模板见 `docs/beta-usability-loop.md`。本文件定义测试计划和验收标准；`beta-usability-loop.md` 用于每位参与者的 Day 0、Day 1、Day 7、Day 14 记录。
+
 ## 目标
 
 验证 StayThread 是否能在不依赖压力、羞耻或复杂 productivity dashboard 的情况下，帮助初级到中级出海个人独立站长持续推进 SEO/Growth slow-feedback work，尤其是通过 Semrush、Ahrefs、Google Trends 等工具做关键词分析/发现，以及持续推进 SEO 外链工作。
