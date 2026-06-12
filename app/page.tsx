@@ -1257,5 +1257,53 @@ function Settings({ profile, authUser, onSave, onLogout, onExportData, onResetPr
   onResetProgress: () => void;
   onDeleteAccount: () => void;
 }) {
-  return <section className="view active" id="view-settings"><div className="page-head"><div><span className="label">Trust and control</span><h1>Profile data stays editable.</h1><p>StayThread records SEO workload evidence, not your private keyword list or backlink URL list.</p></div></div><div className="settings-grid"><form className="panel settings-card" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); onSave({ dailyAvailableMinutes: Number(form.get("dailyAvailableMinutes") ?? 35), preferredTime: String(form.get("preferredTime") ?? "Afternoon"), goalContext: String(form.get("goalContext") ?? ""), onboardingCompleted: true }); }}><h2>Profile</h2><label>Daily available minutes<input name="dailyAvailableMinutes" type="number" defaultValue={profile?.daily_available_minutes ?? 35} /></label><label>Preferred time<select name="preferredTime" defaultValue={profile?.preferred_time ?? "Afternoon"}><option>Morning</option><option>Afternoon</option><option>Evening</option></select></label><label>Primary goal context<input name="goalContext" defaultValue={profile?.goal_context ?? "Solo international site owner doing keyword analysis and SEO backlink work"} /></label><button className="btn btn-primary" type="submit">Save profile</button></form><section className="panel settings-card"><h2>Account</h2><p>{authUser ? `Signed in as ${authUser.email ?? authUser.id} with ${authUser.provider ?? "email"}. Your workspace is linked to Supabase Auth.` : "You are using prototype preview mode. Create an account to bind this workspace to Supabase Auth."}</p>{authUser ? <button className="btn btn-secondary" onClick={onLogout}>Sign out</button> : null}</section><section className="panel settings-card"><h2>Privacy controls</h2><p>Export is a full JSON snapshot. Reset removes progress and reviews while keeping profile and goals. Delete account removes the prototype profile and cascaded data. Real keywords and backlink URLs are not required for the beta loop.</p><button className="btn btn-secondary" onClick={onExportData}>Export profile data</button><button className="btn btn-secondary" onClick={onResetProgress}>Reset progress data</button><button className="btn btn-danger" onClick={onDeleteAccount}>Delete account</button></section></div></section>;
+  return (
+    <section className="view active" id="view-settings">
+      <div className="page-head">
+        <div>
+          <span className="label">Trust and control</span>
+          <h1>Profile data stays editable.</h1>
+          <p>StayThread records SEO workload evidence, not your private keyword list or backlink URL list.</p>
+        </div>
+      </div>
+      <div className="settings-grid">
+        <form
+          className="panel settings-card"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const form = new FormData(event.currentTarget);
+            onSave({
+              dailyAvailableMinutes: Number(form.get("dailyAvailableMinutes") ?? 35),
+              preferredTime: String(form.get("preferredTime") ?? "Afternoon"),
+              goalContext: String(form.get("goalContext") ?? ""),
+              onboardingCompleted: true,
+            });
+          }}
+        >
+          <h2>Profile</h2>
+          <label>Daily available minutes<input name="dailyAvailableMinutes" type="number" defaultValue={profile?.daily_available_minutes ?? 35} /></label>
+          <label>Preferred time<select name="preferredTime" defaultValue={profile?.preferred_time ?? "Afternoon"}><option>Morning</option><option>Afternoon</option><option>Evening</option></select></label>
+          <label>Primary goal context<input name="goalContext" defaultValue={profile?.goal_context ?? "Solo international site owner doing keyword analysis and SEO backlink work"} /></label>
+          <button className="btn btn-primary" type="submit">Save profile</button>
+        </form>
+        <section className="panel settings-card">
+          <h2>Account</h2>
+          <p>{authUser ? `Signed in as ${authUser.email ?? authUser.id} with ${authUser.provider ?? "email"}. Your workspace is linked to Supabase Auth.` : "You are using prototype preview mode. Create an account to bind this workspace to Supabase Auth."}</p>
+          {authUser ? <button className="btn btn-secondary" onClick={onLogout}>Sign out</button> : null}
+        </section>
+        <section className="panel settings-card">
+          <h2>AI interface</h2>
+          <p>AI is configured server-side with only an endpoint and key: `AI_API_ENDPOINT` and `AI_API_KEY`. StayThread does not ask users to choose a provider here.</p>
+          <p>Supported interface modes are Chat-completions JSON or a custom JSON adapter endpoint. The key never belongs in browser state or profile preferences.</p>
+        </section>
+        <section className="panel settings-card">
+          <h2>Privacy controls</h2>
+          <p>Export is a full JSON snapshot. Reset removes progress and reviews while keeping profile and goals. Delete account removes the prototype profile and cascaded data. Real keywords and backlink URLs are not required for the beta loop.</p>
+          <button className="btn btn-secondary" onClick={onExportData}>Export profile data</button>
+          <button className="btn btn-secondary" onClick={onResetProgress}>Reset progress data</button>
+          <button className="btn btn-danger" onClick={onDeleteAccount}>Delete account</button>
+        </section>
+      </div>
+    </section>
+  );
 }

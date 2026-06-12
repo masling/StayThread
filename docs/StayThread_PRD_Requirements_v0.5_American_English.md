@@ -659,6 +659,30 @@ Analytics:
 
 ## 8. AI Task Definitions
 
+### AI Interface Configuration
+
+StayThread should treat AI as a provider-neutral HTTP interface. Configuration requires only:
+
+- `AI_API_ENDPOINT`: the server-side URL to call.
+- `AI_API_KEY`: the server-side authorization key.
+
+Optional:
+
+- `AI_API_MODE`: `chat_completions` or `custom_json`.
+
+Supported interface forms:
+
+- `chat_completions`: Chat Completions-style JSON endpoint. The endpoint can belong to any provider, gateway, proxy, or self-hosted service.
+- `custom_json`: StayThread sends structured task JSON to a project-owned adapter endpoint and expects structured JSON back.
+
+Product and admin UI should not require choosing a specific provider in product settings. The endpoint determines where requests go. Provider identity may be inferred in logs if useful, but it is not part of the required configuration.
+
+Security rules:
+
+- `AI_API_KEY` is server-only.
+- Do not store AI keys in browser state, `user_profiles.ai_preferences`, local storage, screenshots, docs, or git.
+- If endpoint/key are missing, invalid, or timeout, use deterministic fallback templates.
+
 ### AI Task: AssessmentInterpreter
 
 Trigger: assessment result page after deterministic scoring.

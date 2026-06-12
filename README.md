@@ -51,6 +51,8 @@ Current Next.js MVP covers:
 
 AI generation is still deterministic/template-governed. Future controlled server-side AI should only improve wording, explanation, review tone, and summarization. It must not generate keyword targets, backlink URLs, domains, or outreach recipients for the site-owner beta.
 
+AI interface configuration is provider-neutral. When controlled AI is enabled, the app should read only a server-side endpoint and key, then call that endpoint directly. Do not branch product configuration by a specific provider name.
+
 ## Run Next.js App
 
 Install dependencies if needed:
@@ -71,12 +73,23 @@ Fill in:
 NEXT_PUBLIC_SUPABASE_URL=https://jynkglmuzdounpavahko.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
+AI_API_ENDPOINT=...
+AI_API_KEY=...
+AI_API_MODE=chat_completions
 ```
 
 Key safety:
 
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` is public / browser-safe, but database access still depends on correct RLS policies.
 - `SUPABASE_SERVICE_ROLE_KEY` is server-only and high privilege. Never expose it in browser code, screenshots, docs, or git.
+- `AI_API_ENDPOINT` and `AI_API_KEY` are the only required AI interface settings when controlled AI is enabled.
+- Do not configure AI by provider name. The app should call the endpoint supplied in `AI_API_ENDPOINT`.
+- `AI_API_KEY` is server-only. Never store it in `user_profiles.ai_preferences`, browser local storage, screenshots, docs, or git.
+
+AI interface modes:
+
+- `chat_completions`: default Chat Completions-style JSON endpoint.
+- `custom_json`: a project-owned adapter endpoint that accepts StayThread task JSON and returns structured JSON.
 
 Start local dev:
 

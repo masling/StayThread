@@ -5,7 +5,7 @@
 - App: Next.js App Router + TypeScript.
 - Styling: extracted token layer from `staythread-mvp/styles.css`, imported through `app/globals.css`.
 - Auth/database: Supabase Auth + PostgreSQL.
-- AI: server-side structured calls later; current MVP uses deterministic templates and review helpers.
+- AI: provider-neutral server-side interface later; current MVP uses deterministic templates and review helpers.
 - Analytics: PostgreSQL `events` table first; dedicated analytics can be evaluated after beta.
 
 The active application is `app/`. The `staythread-mvp/` folder remains a legacy static reference for flow, UI direction, and copy comparison.
@@ -138,6 +138,29 @@ Not implemented:
 ## AI Guardrails
 
 Current implementation is deterministic and logs guardrails in `ai_generation_logs`.
+
+## AI Interface Contract
+
+StayThread should not configure AI by vendor/provider name. The runtime AI configuration has only two required server-side values:
+
+- `AI_API_ENDPOINT`: the URL to call.
+- `AI_API_KEY`: the server-side secret used to authorize the call.
+
+Optional:
+
+- `AI_API_MODE`: `chat_completions` or `custom_json`.
+
+Supported interface modes:
+
+- `chat_completions`: default Chat Completions-style JSON endpoint. This can point at any provider, gateway, proxy, or self-hosted endpoint that implements a compatible request/response shape.
+- `custom_json`: a project-owned adapter endpoint. StayThread sends structured task JSON and expects structured JSON back.
+
+Rules:
+
+- Do not add provider selectors to product settings.
+- Do not store `AI_API_KEY` in browser state, `user_profiles.ai_preferences`, local storage, screenshots, or docs.
+- If the endpoint is not configured or fails, StayThread must fall back to deterministic templates.
+- Prompt/model/version observability can be recorded in `ai_generation_logs`, but vendor identity is not required for product configuration.
 
 Future AI calls must follow:
 

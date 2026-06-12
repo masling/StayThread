@@ -39,6 +39,7 @@ StayThread 不是普通 to-do list、habit tracker、blocker、dopamine detox ap
 - Personalization over generic advice：只收集会影响所选 module 或 category 的信息。
 - Process feedback over instant reward：展示已完成的工作量和过程证据，例如打开工具、分析站点数、分析词根数、分析关键词数、可用关键词数量、筛选外链机会数，而不是要求用户保存真实关键词或真实外链地址。
 - AI as structured assistant：AI 负责解释、表达和总结；核心规则和 templates 保持 deterministic，方便测试。
+- AI interface as endpoint/key：AI 配置不按供应商区分，不要求用户选择具体供应商；服务端只需要通用接口地址和 key，可选接口模式为 Chat-completions JSON 或项目自有 custom JSON adapter。
 
 ## MVP 信息架构
 
@@ -118,6 +119,7 @@ StayThread 不是普通 to-do list、habit tracker、blocker、dopamine detox ap
 - 有效关键词默认不要求用户在系统保存真实词；可记录编号、预估搜索量、Google 结果总数、首页竞争对手数量等可选元数据。
 - 有效外链机会默认不要求用户在系统保存真实 URL；可记录编号、是否有申请通道、是否可能通过、是否为正常内容网站、是否排除垃圾外链站。
 - AI 自由度保持低：AI 不输出关键词和外链对象，只对工作数据做鼓励式评价、复盘和持续执行建议。
+- AI 接口配置保持供应商中立：只配置 `AI_API_ENDPOINT` 和 `AI_API_KEY`，key 只留在服务端，不进入用户 profile、浏览器状态或截图。
 - 付费意愿需要在 Day 14 访谈中确认，并收集用户对会员教程服务的反馈。
 - 隐私边界：用户的真实关键词和外链地址通常是私有成果和财富，平台默认只做步骤提醒、工作量记录和持续行动反馈。
 - 首轮 beta 保持 14 天；是否扩展到 30 天在第一批 Day 14 复盘后决定。
