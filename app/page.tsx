@@ -218,6 +218,10 @@ function routeFromHash(): RouteId {
   return routeIds.includes(hash as RouteId) ? (hash as RouteId) : "landing";
 }
 
+function appEntryRoute(profile: Profile | null): RouteId {
+  return profile?.onboarding_completed ? "today" : "onboarding";
+}
+
 export default function Home() {
   const [route, setRoute] = useState<RouteId>("landing");
   const [loading, setLoading] = useState(true);
@@ -287,6 +291,10 @@ export default function Home() {
     return () => window.clearTimeout(id);
   }, [toast]);
 
+  useEffect(() => {
+    if (!loading && route === "auth" && authUser) navigate(appEntryRoute(profile));
+  }, [authUser, loading, profile, route]);
+
   function navigate(nextRoute: RouteId) {
     window.location.hash = nextRoute;
     setRoute(nextRoute);
@@ -311,12 +319,12 @@ export default function Home() {
     }
   }
 
-  async function authenticate(event: FormEvent<HTMLFormElement>, mode: "login" | "register") {
+  async function authenticate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setError("");
     try {
-      const response = await apiFetch<{ user: AuthUser; profile: Profile }>(`/api/auth/${mode}`, {
+      const response = await apiFetch<{ user: AuthUser; profile: Profile }>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({
           email: String(form.get("email") ?? ""),
@@ -325,8 +333,8 @@ export default function Home() {
       });
       setAuthUser(response.user);
       setProfile(response.profile);
-      setToast(mode === "register" ? "Account created and workspace saved." : "Signed in.");
-      navigate(response.profile.onboarding_completed ? "today" : "onboarding");
+      setToast("Signed in.");
+      navigate(appEntryRoute(response.profile));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
     }
@@ -608,7 +616,7 @@ export default function Home() {
       ) : null}
 
       <main className="main">
-        {route === "landing" ? <Landing onNavigate={navigate} /> : null}
+        {route === "landing" ? <Landing onNavigate={navigate} authUser={authUser} profile={profile} /> : null}
         {route === "auth" ? <Auth onNavigate={navigate} onAuthenticate={authenticate} onProviderAuth={authenticateWithProvider} /> : null}
         {route === "onboarding" ? <Onboarding profile={profile} taskCategories={taskCategories} onSave={saveProfile} onNavigate={navigate} /> : null}
         {route === "assessment" ? (
@@ -623,7 +631,7 @@ export default function Home() {
             </div>
             <div className="progress"><span style={{ width: `${((questionIndex + 1) / assessmentQuestions.length) * 100}%` }} /></div>
             {assessmentResult && questionIndex === assessmentQuestions.length ? (
-              <AssessmentResultView result={assessmentResult} onNavigate={navigate} onRetake={() => setQuestionIndex(0)} />
+              <AssessmentResultView result={assessmentResult} authUser={authUser} profile={profile} onNavigate={navigate} onRetake={() => setQuestionIndex(0)} />
             ) : (
               <section className="panel assessment-card">
                 <span className="badge badge-blue">{currentQuestion.dimension}</span>
@@ -703,7 +711,8 @@ export default function Home() {
   );
 }
 
-function Landing({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
+function Landing({ onNavigate, authUser, profile }: { onNavigate: (route: RouteId) => void; authUser: AuthUser | null; profile: Profile | null }) {
+  const signedInRoute = appEntryRoute(profile);
   return (
     <section className="view public-view active" id="view-landing" aria-labelledby="landing-title">
       <header className="public-nav">
@@ -713,7 +722,7 @@ function Landing({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
         </button>
         <nav aria-label="Public">
           <button className="btn btn-secondary" onClick={() => onNavigate("assessment")}>Try assessment</button>
-          <button className="btn btn-primary" onClick={() => onNavigate("auth")}>Sign in</button>
+          <button className="btn btn-primary" onClick={() => onNavigate(authUser ? signedInRoute : "auth")}>{authUser ? "Open app" : "Sign in"}</button>
         </nav>
       </header>
       <section className="landing-hero">
@@ -887,10 +896,9 @@ function LandingInfo({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
 
 function Auth({ onNavigate, onAuthenticate, onProviderAuth }: {
   onNavigate: (route: RouteId) => void;
-  onAuthenticate: (event: FormEvent<HTMLFormElement>, mode: "login" | "register") => void;
+  onAuthenticate: (event: FormEvent<HTMLFormElement>) => void;
   onProviderAuth: (provider: OAuthProviderId) => void;
 }) {
-  const [mode, setMode] = useState<"login" | "register">("register");
   return (
     <section className="view public-view active" id="view-auth" aria-labelledby="auth-title">
       <header className="public-nav">
@@ -900,8 +908,8 @@ function Auth({ onNavigate, onAuthenticate, onProviderAuth }: {
         <nav aria-label="Auth"><button className="btn btn-secondary" onClick={() => onNavigate("landing")}>Back</button></nav>
       </header>
       <section className="auth-layout">
-        <div><span className="label">Account</span><h1 id="auth-title">Save the assessment when the plan feels right.</h1><p>Third-party sign-in creates or restores the account in one step. Email remains available when you want a password-based login.</p></div>
-        <form className="panel auth-card" onSubmit={(event) => onAuthenticate(event, mode)}>
+        <div><span className="label">Account</span><h1 id="auth-title">Sign in to continue your workspace.</h1><p>Google and GitHub create or restore the account in one step. Email is available for existing password-based accounts.</p></div>
+        <form className="panel auth-card" onSubmit={onAuthenticate}>
           <div className="oauth-grid">
             {oauthProviderOptions.map((provider) => (
               <button className="btn btn-secondary oauth-button" type="button" onClick={() => onProviderAuth(provider.id)} key={provider.id}>
@@ -911,13 +919,9 @@ function Auth({ onNavigate, onAuthenticate, onProviderAuth }: {
             ))}
           </div>
           <div className="auth-divider"><span>Email account</span></div>
-          <div className="auth-toggle" role="tablist" aria-label="Auth mode">
-            <button className={mode === "register" ? "active" : ""} type="button" onClick={() => setMode("register")}>Create account</button>
-            <button className={mode === "login" ? "active" : ""} type="button" onClick={() => setMode("login")}>Sign in</button>
-          </div>
           <label>Email<input name="email" type="email" defaultValue="builder@example.com" autoComplete="email" /></label>
-          <label>Password<input name="password" type="password" defaultValue="staythread-demo" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>
-          <button className="btn btn-primary" type="submit">{mode === "register" ? "Create account and save workspace" : "Sign in"}</button>
+          <label>Password<input name="password" type="password" defaultValue="staythread-demo" autoComplete="current-password" /></label>
+          <button className="btn btn-primary" type="submit">Sign in</button>
           <button className="btn btn-secondary" type="button" onClick={() => onNavigate("assessment")}>Try assessment first</button>
         </form>
       </section>
@@ -984,7 +988,8 @@ function Onboarding({ profile, taskCategories, onSave, onNavigate }: {
   );
 }
 
-function AssessmentResultView({ result, onNavigate, onRetake }: { result: AssessmentResult; onNavigate: (route: RouteId) => void; onRetake: () => void }) {
+function AssessmentResultView({ result, authUser, profile, onNavigate, onRetake }: { result: AssessmentResult; authUser: AuthUser | null; profile: Profile | null; onNavigate: (route: RouteId) => void; onRetake: () => void }) {
+  const signedInRoute = appEntryRoute(profile);
   return (
     <section className="panel result-card">
       <span className="label">Your result</span>
@@ -1005,7 +1010,7 @@ function AssessmentResultView({ result, onNavigate, onRetake }: { result: Assess
         <article className="plan-card"><span className="badge">7-day plan</span><h3>No intensity jump</h3><p>Complete one valid action each day and review after day seven.</p></article>
       </div>
       <div className="controls">
-        <button className="btn btn-primary" onClick={() => onNavigate("auth")}>Create account to save</button>
+        <button className="btn btn-primary" onClick={() => onNavigate(authUser ? signedInRoute : "auth")}>{authUser ? "Open app" : "Sign in to save"}</button>
         <button className="btn btn-secondary" onClick={() => onNavigate("today")}>Preview Today page</button>
         <button className="btn btn-secondary" onClick={onRetake}>Retake</button>
       </div>
