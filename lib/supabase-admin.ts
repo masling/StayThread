@@ -3,6 +3,22 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 let cachedClient: SupabaseClient | null = null;
 let cachedAnonClient: SupabaseClient | null = null;
 
+class DisabledRealtimeWebSocket {
+  constructor() {
+    throw new Error("Realtime is disabled for StayThread server-side Supabase clients.");
+  }
+}
+
+const serverClientOptions = {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+  realtime: {
+    transport: DisabledRealtimeWebSocket as never,
+  },
+};
+
 export function getSupabaseAdmin() {
   if (cachedClient) return cachedClient;
 
@@ -13,12 +29,7 @@ export function getSupabaseAdmin() {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
   }
 
-  cachedClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  cachedClient = createClient(supabaseUrl, serviceRoleKey, serverClientOptions);
 
   return cachedClient;
 }
@@ -33,12 +44,7 @@ export function getSupabaseAuthClient() {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.");
   }
 
-  cachedAnonClient = createClient(supabaseUrl, anonKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  cachedAnonClient = createClient(supabaseUrl, anonKey, serverClientOptions);
 
   return cachedAnonClient;
 }

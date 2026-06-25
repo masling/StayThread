@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import type { Provider } from "@supabase/supabase-js";
 import { assessmentQuestions, dimensions, type AssessmentResult, type SeoWorkEvidence } from "@/lib/staythread-domain";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -87,6 +88,17 @@ type AuthUser = {
   email: string | null;
   provider?: string | null;
 };
+
+type OAuthProviderId = "google" | "github";
+
+const oauthProviderOptions: Array<{
+  id: OAuthProviderId;
+  label: string;
+  hint: string;
+}> = [
+  { id: "google", label: "Continue with Google", hint: "Fastest on Chrome" },
+  { id: "github", label: "Continue with GitHub", hint: "Developer account" },
+];
 
 type BootstrapData = {
   user: AuthUser | null;
@@ -270,31 +282,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const hash = window.location.hash;
-    if (!hash.includes("access_token") && !hash.includes("refresh_token")) return;
-    getSupabaseBrowserClient()
-      .auth.getSession()
-      .then(({ data, error: sessionError }) => {
-        if (sessionError) throw sessionError;
-        const accessToken = data.session?.access_token;
-        if (!accessToken) throw new Error("OAuth session did not include an access token.");
-        return apiFetch<{ user: AuthUser; profile: Profile }>("/api/auth/session", {
-          method: "POST",
-          body: JSON.stringify({ accessToken }),
-        });
-      })
-      .then((response) => {
-        setAuthUser(response.user);
-        setProfile(response.profile);
-        setToast("OAuth sign-in complete.");
-        window.history.replaceState(null, "", `${window.location.pathname}#onboarding`);
-        setRoute(response.profile.onboarding_completed ? "today" : "onboarding");
-      })
-      .catch((err: Error) => setError(err.message));
-  }, []);
-
-  useEffect(() => {
     if (!toast) return;
     const id = window.setTimeout(() => setToast(""), 2400);
     return () => window.clearTimeout(id);
@@ -357,14 +344,34 @@ export default function Home() {
     }
   }
 
-  async function authenticateWithProvider(provider: "google" | "github") {
+  function isChromeBrowser() {
+    const ua = navigator.userAgent;
+    return /Chrome|CriOS/.test(ua) && !/Edg|OPR|Opera/.test(ua);
+  }
+
+  function oauthProvider(provider: OAuthProviderId): Provider {
+    return provider;
+  }
+
+  async function authenticateWithProvider(provider: OAuthProviderId) {
     setError("");
     try {
       const origin = window.location.origin;
+      const scopesByProvider: Partial<Record<OAuthProviderId, string>> = {
+        github: "read:user user:email",
+      };
       const { error: oauthError } = await getSupabaseBrowserClient().auth.signInWithOAuth({
-        provider,
+        provider: oauthProvider(provider),
         options: {
-          redirectTo: `${origin}/#auth`,
+          redirectTo: `${origin}/auth/callback`,
+          scopes: scopesByProvider[provider],
+          queryParams:
+            provider === "google"
+              ? {
+                  prompt: isChromeBrowser() ? "select_account" : "consent",
+                  access_type: "offline",
+                }
+              : undefined,
         },
       });
       if (oauthError) throw oauthError;
@@ -881,7 +888,7 @@ function LandingInfo({ onNavigate }: { onNavigate: (route: RouteId) => void }) {
 function Auth({ onNavigate, onAuthenticate, onProviderAuth }: {
   onNavigate: (route: RouteId) => void;
   onAuthenticate: (event: FormEvent<HTMLFormElement>, mode: "login" | "register") => void;
-  onProviderAuth: (provider: "google" | "github") => void;
+  onProviderAuth: (provider: OAuthProviderId) => void;
 }) {
   const [mode, setMode] = useState<"login" | "register">("register");
   return (
@@ -893,8 +900,17 @@ function Auth({ onNavigate, onAuthenticate, onProviderAuth }: {
         <nav aria-label="Auth"><button className="btn btn-secondary" onClick={() => onNavigate("landing")}>Back</button></nav>
       </header>
       <section className="auth-layout">
-        <div><span className="label">Account</span><h1 id="auth-title">Save the assessment when the plan feels right.</h1><p>You can test the flow first. Then create a real Supabase Auth account so the workspace is tied to a user instead of only a prototype browser cookie.</p></div>
+        <div><span className="label">Account</span><h1 id="auth-title">Save the assessment when the plan feels right.</h1><p>Third-party sign-in creates or restores the account in one step. Email remains available when you want a password-based login.</p></div>
         <form className="panel auth-card" onSubmit={(event) => onAuthenticate(event, mode)}>
+          <div className="oauth-grid">
+            {oauthProviderOptions.map((provider) => (
+              <button className="btn btn-secondary oauth-button" type="button" onClick={() => onProviderAuth(provider.id)} key={provider.id}>
+                <span>{provider.label}</span>
+                <small>{provider.hint}</small>
+              </button>
+            ))}
+          </div>
+          <div className="auth-divider"><span>Email account</span></div>
           <div className="auth-toggle" role="tablist" aria-label="Auth mode">
             <button className={mode === "register" ? "active" : ""} type="button" onClick={() => setMode("register")}>Create account</button>
             <button className={mode === "login" ? "active" : ""} type="button" onClick={() => setMode("login")}>Sign in</button>
@@ -902,10 +918,6 @@ function Auth({ onNavigate, onAuthenticate, onProviderAuth }: {
           <label>Email<input name="email" type="email" defaultValue="builder@example.com" autoComplete="email" /></label>
           <label>Password<input name="password" type="password" defaultValue="staythread-demo" autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>
           <button className="btn btn-primary" type="submit">{mode === "register" ? "Create account and save workspace" : "Sign in"}</button>
-          <div className="oauth-grid">
-            <button className="btn btn-secondary" type="button" onClick={() => onProviderAuth("google")}>Continue with Google</button>
-            <button className="btn btn-secondary" type="button" onClick={() => onProviderAuth("github")}>Continue with GitHub</button>
-          </div>
           <button className="btn btn-secondary" type="button" onClick={() => onNavigate("assessment")}>Try assessment first</button>
         </form>
       </section>

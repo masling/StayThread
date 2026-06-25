@@ -54,7 +54,8 @@ Current implementation note:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` is used server-side by `/api/auth/login` to verify password sign-in through Supabase Auth.
 - Authenticated sessions are stored in a signed, httpOnly `staythread_auth` cookie; prototype preview sessions still use `staythread_uid`.
 - Google/GitHub OAuth uses the browser Supabase client to obtain a provider session, then posts the Supabase access token to the server-owned app session bridge.
-- Supabase dashboard must enable Google and GitHub providers and allow local/production redirect URLs.
+- OAuth redirects must allow `/auth/callback` for local and production URLs. Chrome users signing in with Google are sent through Google's account chooser prompt.
+- Supabase dashboard must enable the desired providers and allow local/production redirect URLs.
 
 ## Database Tables
 
@@ -79,6 +80,7 @@ RLS is enabled for user-owned data. The current MVP API uses a server-side servi
 - `POST /api/auth/register`: creates a Supabase Auth user, binds the current profile to `auth_user_id`, and sets a signed auth session.
 - `POST /api/auth/login`: verifies email/password with Supabase Auth and restores the linked workspace.
 - `POST /api/auth/session`: verifies a Supabase OAuth access token, binds/restores the profile, and sets a signed app session.
+- `GET /auth/callback`: browser OAuth return page that exchanges/loads the Supabase session and calls `/api/auth/session`.
 - `POST /api/auth/logout`: clears the signed auth session.
 - `GET /api/auth/me`: returns the current signed auth user.
 - `GET/PATCH /api/profile`: loads and updates onboarding/profile inputs.
