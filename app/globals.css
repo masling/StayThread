@@ -4,6 +4,15 @@ body {
   min-height: 100vh;
 }
 
+.main {
+  padding: 32px clamp(24px, 3vw, 48px);
+}
+
+.main > .view.active {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+}
+
 .setup-error {
   margin-top: 16px;
   padding: 14px;
@@ -21,16 +30,39 @@ body {
   font-weight: 700;
 }
 
-.seo-evidence-panel {
-  grid-column: 1 / -1;
-}
-
 .field-hint {
   display: block;
   margin-top: 6px;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.today-grid {
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.right-rail {
+  grid-column: 2;
+  grid-row: 2 / span 3;
+}
+
+.seo-evidence-panel {
+  grid-column: 1;
+}
+
+@media (max-width: 1100px) {
+  .right-rail,
+  .seo-evidence-panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .main > .view.active {
+    width: 100%;
+  }
 }
 
 .auth-divider {
