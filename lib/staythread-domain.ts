@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n";
+
 export const dimensions = [
   "Goal clarity",
   "Startup ability",
@@ -272,7 +274,10 @@ export function generateReviewFeedback(input: {
   movedForward: string;
   interruption: string;
   tomorrowMinimum: string;
-}) {
+}, locale: Locale = "en") {
+  if (locale === "zh") {
+    return `${input.movedForward || "一个 SEO 工作计数向前推进了。"} 中断是有用数据，不是失败。把真实关键词和 URL 留在你的私有工作区。明天从这里开始：${input.tomorrowMinimum || "一个保线动作。"}`;
+  }
   return `${input.movedForward || "One SEO work count moved forward."} The interruption is useful data, not a failure. Keep the actual keywords and URLs in your private workspace. Tomorrow, start with: ${input.tomorrowMinimum || "one keep-alive action."}`;
 }
 
@@ -282,13 +287,37 @@ export function generateWeeklyReview(input: {
   activeGoals: number;
   latestDailyFeedback?: string | null;
   seoWorkEvidence?: Record<string, number>;
+  locale?: Locale;
 }) {
+  const locale = input.locale ?? "en";
   const completionRate = input.totalCount > 0 ? Math.round((input.completedCount / input.totalCount) * 100) : 0;
   const seoWorkEvidence = input.seoWorkEvidence ?? {};
   const bottlenecks =
     completionRate >= 70
-      ? ["Task volume can rise slightly next week.", "Keep recording counts, not private keywords or backlink URLs."]
-      : ["Continuity is still fragile.", "The next plan should lower friction before adding volume."];
+      ? locale === "zh"
+        ? ["下周任务量可以小幅上升。", "继续记录计数，不记录私密关键词或外链 URL。"]
+        : ["Task volume can rise slightly next week.", "Keep recording counts, not private keywords or backlink URLs."]
+      : locale === "zh"
+        ? ["连续性仍然脆弱。", "下一份计划应该先降低摩擦，再增加任务量。"]
+        : ["Continuity is still fragile.", "The next plan should lower friction before adding volume."];
+
+  if (locale === "zh") {
+    return {
+      summary: `本周在 ${input.activeGoals} 条活跃 SEO 主线中完成了 ${input.completedCount}/${input.totalCount} 个任务。StayThread 正在追踪工作证据，而不是你的私密关键词或外链列表。最好的下一步是保持主线可信，只在连续性可见后再提高深度。`,
+      assetGrowth: {
+        completed_tasks: input.completedCount,
+        completion_rate: completionRate,
+        active_goals: input.activeGoals,
+        ...seoWorkEvidence,
+      },
+      bottlenecks,
+      nextWeekPlan: [
+        "让一个主要 SEO/Growth 目标在今日页保持可见。",
+        completionRate >= 70 ? "在高能量日把一个任务从轻量提升到标准。" : "前三天默认使用轻量/保线任务。",
+        input.latestDailyFeedback ?? "每天用一句话结束：今天推进了什么。",
+      ],
+    };
+  }
 
   return {
     summary: `This week logged ${input.completedCount} of ${input.totalCount} tasks across ${input.activeGoals} active SEO threads. StayThread is tracking work evidence, not your private keyword or backlink list. The best next move is to keep the line credible and only increase depth after consistency is visible.`,

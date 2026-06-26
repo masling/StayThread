@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const body = (await request.json().catch(() => ({}))) as { locale?: string };
+    const locale = body.locale === "zh" ? "zh" : "en";
     const supabase = getSupabaseAdmin();
     const { prototypeSession: session, profile } = await resolveRequestProfile(request, supabase);
     const goals = await ensureSeedGoals(supabase, profile);
@@ -72,6 +74,7 @@ export async function POST(request: NextRequest) {
       activeGoals: goals.length,
       latestDailyFeedback: reviews?.[0]?.coach_feedback ?? null,
       seoWorkEvidence,
+      locale,
     });
 
     const { data, error } = await supabase

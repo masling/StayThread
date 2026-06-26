@@ -11,11 +11,13 @@ export async function POST(request: NextRequest) {
       movedForward?: string;
       interruption?: string;
       tomorrowMinimum?: string;
+      locale?: string;
     };
-    const movedForward = body.movedForward?.trim() || "One SEO work count moved forward.";
-    const interruption = body.interruption?.trim() || "No major interruption recorded.";
-    const tomorrowMinimum = body.tomorrowMinimum?.trim() || "Choose one keep-alive SEO action.";
-    const coachFeedback = generateReviewFeedback({ movedForward, interruption, tomorrowMinimum });
+    const locale = body.locale === "zh" ? "zh" : "en";
+    const movedForward = body.movedForward?.trim() || (locale === "zh" ? "一个 SEO 工作计数向前推进了。" : "One SEO work count moved forward.");
+    const interruption = body.interruption?.trim() || (locale === "zh" ? "没有记录主要中断。" : "No major interruption recorded.");
+    const tomorrowMinimum = body.tomorrowMinimum?.trim() || (locale === "zh" ? "选择一个保线 SEO 动作。" : "Choose one keep-alive SEO action.");
+    const coachFeedback = generateReviewFeedback({ movedForward, interruption, tomorrowMinimum }, locale);
 
     const supabase = getSupabaseAdmin();
     const { prototypeSession: session, profile } = await resolveRequestProfile(request, supabase);
